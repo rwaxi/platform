@@ -1,4 +1,4 @@
-# RWAXI Platform — Architecture
+# 2 · Architecture overview
 
 > Status: **Draft v0.1** · 2026-09-24 · Owner: technical lead
 > Scope: complete target architecture of the RWAXI platform on Stellar/Soroban, as required by SCF Build ("technical architecture must already be complete at the time of application").
@@ -20,16 +20,9 @@ Stellar is the compliance and settlement layer of the product, not a storage add
 | Subscription and distributions in dollars | Native USDC on Stellar (Stellar Asset Contract) |
 | COP on/off-ramp | SEP-24 anchor (abstracted, not on the critical path) |
 
-## 2. Documents
+## 2. Reading order
 
-| Doc | Content |
-|---|---|
-| [c4-context.md](c4-context.md) | C4 Level 1 — system context, actors and external systems |
-| [c4-containers.md](c4-containers.md) | C4 Level 2 — on-chain contracts, backend, apps, infra |
-| [c4-components.md](c4-components.md) | C4 Level 3 — contract-by-contract and backend module breakdown, interfaces, roles |
-| [../dataflow.md](../dataflow.md) | Data flow diagram and trust boundaries (threat-model input) |
-| [sequences.md](sequences.md) | Critical flows: compliance-checked transfer, onboarding, subscription, distribution, recovery |
-| [../adr/](../adr/README.md) | Architecture Decision Records ADR-001 … ADR-007 |
+The rest of the documentation follows the order we use to explain the platform: [3 · C4 model](3-c4/1-context.md), [4 · Flows](4-flows.md), [5 · Security](5-security.md), [6 · Decisions](6-decisions/README.md) and [7 · Model and diagrams](7-model/README.md).
 
 ## 3. Scope boundaries
 
@@ -37,26 +30,26 @@ Three scopes must never be mixed, because SCF does not reimburse work done befor
 
 | Scope | When | Funded by | What |
 |---|---|---|---|
-| **Spike** (evidence) | Oct 2026 | RWAXI, outside the award | One RWA token + minimal identity stack + compliance dispatcher + **one** custom module (Reg S distribution compliance period, [ADR-007](../adr/ADR-007-spike-compliance-rule-reg-s.md)). One blocked and one allowed transfer on testnet with public hashes. |
+| **Spike** (evidence) | Oct 2026 | RWAXI, outside the award | One RWA token + minimal identity stack + compliance dispatcher + **one** custom module (Reg S distribution compliance period, [ADR-007](6-decisions/ADR-007-spike-compliance-rule-reg-s.md)). One blocked and one allowed transfer on testnet with public hashes. |
 | **Award** (T1–T3) | Jan–Mar 2027 | SCF Build Award | Everything else in this document that is Stellar-integrated (see §5). |
 | **Out of award** | Any | RWAXI | Institutional website, marketing, legal work, audits (Audit Bank), referral program, support tooling, AI assistant, IP registration. |
 
 ## 4. Architecture at a glance
 
-![Containers](diagrams/c4-2-containers.png)
+![Containers](7-model/diagrams/c4-2-containers.png)
 
-All the diagrams come from a single Archi model, [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate), so all twelve views use the same names. When the architecture changes, change the model first and export again. Don't edit the PNGs.
+All the diagrams come from a single Archi model, [`7-model/rwaxi-architecture.archimate`](7-model/rwaxi-architecture.archimate), so all twelve views use the same names. When the architecture changes, change the model first and export again. Don't edit the PNGs.
 
 | View | What it answers |
 |---|---|
-| [C4-1 System context](c4-context.md) | Who uses RWAXI and which outside systems we depend on |
-| [C4-2 Containers](c4-containers.md) | What we deploy, where it runs and how the pieces talk |
-| [C4-3a Vehicle contracts](c4-components.md#11-vehicle-contracts) | Which contracts each vehicle gets |
-| [C4-3b Compliance and identity](c4-components.md#12-compliance-and-identity) | How a transfer is checked before it settles |
-| [Flows 1 to 5](sequences.md) | Transfer, onboarding, subscription, distribution and recovery, step by step |
-| [DFD 1a, 1b and 2](../dataflow.md) | Where data goes and which trust boundary it crosses (input to the threat model) |
+| [C4-1 System context](3-c4/1-context.md) | Who uses RWAXI and which outside systems we depend on |
+| [C4-2 Containers](3-c4/2-containers.md) | What we deploy, where it runs and how the pieces talk |
+| [C4-3a Vehicle contracts](3-c4/3-components.md#11-vehicle-contracts) | Which contracts each vehicle gets |
+| [C4-3b Compliance and identity](3-c4/3-components.md#12-compliance-and-identity) | How a transfer is checked before it settles |
+| [Flows 1 to 5](4-flows.md) | Transfer, onboarding, subscription, distribution and recovery, step by step |
+| [DFD 1a, 1b and 2](5-security.md) | Where data goes and which trust boundary it crosses (input to the threat model) |
 
-To export: open the model in Archi 5 and use *Report › HTML*, or run `Archi -application com.archimatetool.commandline.app --loadModel archi/rwaxi-architecture.archimate --html.createReport <dir>` and copy the view images to `diagrams/`.
+How to export them is in [7 · Model and diagrams](7-model/README.md).
 ## 5. Components by tranche
 
 | Component | Spike 2026 | T1 · MVP (testnet) | T2 · Full product (testnet) | T3 · Mainnet |
@@ -89,8 +82,8 @@ Versions must be pinned in `Cargo.toml` / `package.json`; this table is copied i
 | OpenZeppelin `stellar-contracts` (`stellar-tokens`, `stellar-access`, `stellar-accounts`, `stellar-contract-utils`) | 0.7.1 — re-evaluate 0.8.0 when it leaves RC | RWA token, identity, compliance, RBAC, smart accounts |
 | Stellar CLI | pin at spike start | build, deploy, invoke |
 | `@stellar/stellar-sdk` (TS) | pin at T1 start | backend, SDK |
-| `stellar/smart-account-kit` (TS) | pin at T1 start | passkey smart accounts ([ADR-002](../adr/ADR-002-smart-accounts-passkeys.md)) |
-| OpenZeppelin Relayer + Channels plugin | pin at T1 start | fee sponsorship ([ADR-003](../adr/ADR-003-fee-sponsorship-oz-relayer.md)) |
+| `stellar/smart-account-kit` (TS) | pin at T1 start | passkey smart accounts ([ADR-002](6-decisions/ADR-002-smart-accounts-passkeys.md)) |
+| OpenZeppelin Relayer + Channels plugin | pin at T1 start | fee sponsorship ([ADR-003](6-decisions/ADR-003-fee-sponsorship-oz-relayer.md)) |
 | USDC | Circle-issued, SAC on testnet / mainnet | subscription and distributions |
 
 ## 7. Cross-cutting concerns
@@ -114,3 +107,7 @@ Versions must be pinned in `Cargo.toml` / `package.json`; this table is copied i
 | 3 | Whether SCF applies jurisdiction-specific restrictions (testnet-only final tranche) | before tranche plan | RWAXI |
 | 4 | Distribution snapshot mechanism: checkpoint module on compliance hooks vs. off-chain Merkle snapshot (see c4-components §2.8) | T1 kickoff | technical lead |
 | 5 | Timelock on mainnet upgrades | T3 | technical lead |
+
+---
+
+← [1 · README](../README.md) · [Index](README.md) · [3.1 · Context](3-c4/1-context.md) →

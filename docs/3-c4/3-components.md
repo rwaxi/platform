@@ -1,4 +1,4 @@
-# C4 Level 3: Components
+# 3.3 · C4 Level 3: Components
 
 ## 1. On-chain components
 
@@ -6,25 +6,25 @@ This level is split in two views. With every contract in one picture the lines e
 
 ### 1.1 Vehicle contracts
 
-![Vehicle contracts](diagrams/c4-3a-vehicle-contracts.png)
+![Vehicle contracts](../7-model/diagrams/c4-3a-vehicle-contracts.png)
 
-Each investment vehicle gets its own set, deployed by `vehicle-factory` ([ADR-006](../adr/ADR-006-one-token-per-vehicle.md)). The investor's smart account talks to three contracts: `subscription` to pay in USDC during the offering, `rwa-token` to transfer after issuance, and `distribution` to claim payouts. Tokens are minted by `subscription` when the offering closes. Nobody mints by hand.
+Each investment vehicle gets its own set, deployed by `vehicle-factory` ([ADR-006](../6-decisions/ADR-006-one-token-per-vehicle.md)). The investor's smart account talks to three contracts: `subscription` to pay in USDC during the offering, `rwa-token` to transfer after issuance, and `distribution` to claim payouts. Tokens are minted by `subscription` when the offering closes. Nobody mints by hand.
 
 ### 1.2 Compliance and identity
 
-![Compliance and identity](diagrams/c4-3b-compliance-identity.png)
+![Compliance and identity](../7-model/diagrams/c4-3b-compliance-identity.png)
 
 This is what makes it a security token. On every transfer, mint and burn, `rwa-token` asks `identity-verifier` whether both wallets have valid claims, then calls its hooks on the compliance dispatcher, which runs the modules set for that vehicle. If one module says no, the whole transaction reverts.
 
-Most modules come from OpenZeppelin and we only configure them. We write two: `reg-s-distribution-period` ([ADR-007](../adr/ADR-007-spike-compliance-rule-reg-s.md), the rule we prove in the spike) and `balance-checkpoint`, which `distribution` uses to know who held what on the record date. `reg-s-distribution-period` and `country_restrict` read the investor's country from `identity-registry-storage`.
+Most modules come from OpenZeppelin and we only configure them. We write two: `reg-s-distribution-period` ([ADR-007](../6-decisions/ADR-007-spike-compliance-rule-reg-s.md), the rule we prove in the spike) and `balance-checkpoint`, which `distribution` uses to know who held what on the record date. `reg-s-distribution-period` and `country_restrict` read the investor's country from `identity-registry-storage`.
 
-Colors: yellow for people, blue for what we build or configure, orange for contracts we write ourselves, grey for systems we don't control. Source model: [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate).
+Colors: yellow for people, blue for what we build or configure, orange for contracts we write ourselves, grey for systems we don't control. Source model: [`../7-model/rwaxi-architecture.archimate`](../7-model/rwaxi-architecture.archimate).
 
 ## 2. Contracts
 
 ### 2.1 `rwa-token` — OZ `RWAToken` (per vehicle)
 
-Thin wrapper over OZ `stellar-tokens::rwa`. No custom token logic ([ADR-001](../adr/ADR-001-openzeppelin-rwa-module.md)).
+Thin wrapper over OZ `stellar-tokens::rwa`. No custom token logic ([ADR-001](../6-decisions/ADR-001-openzeppelin-rwa-module.md)).
 
 | Function | Role | Notes |
 |---|---|---|
@@ -59,7 +59,7 @@ Registers modules per hook (`Transferred`, `Created`, `Destroyed`) and fans call
 
 | Module | Source | Hook(s) | Rule | Vehicle I config (pending counsel, 2026-10-09) |
 |---|---|---|---|---|
-| `reg-s-distribution-period` | **custom** ([ADR-007](../adr/ADR-007-spike-compliance-rule-reg-s.md)) | Transferred, Created | Until `period_end_ledger`, no tokens may reach a wallet whose identity has a US country relation | Period length set by counsel |
+| `reg-s-distribution-period` | **custom** ([ADR-007](../6-decisions/ADR-007-spike-compliance-rule-reg-s.md)) | Transferred, Created | Until `period_end_ledger`, no tokens may reach a wallet whose identity has a US country relation | Period length set by counsel |
 | `country_restrict` | OZ | Transferred, Created | Blocks recipients from listed countries | OFAC-sanctioned jurisdictions |
 | `initial_lockup_period` | OZ | Created, Transferred, Destroyed | Minted tokens locked N ledgers; only unlocked balance is movable | Holding period set by counsel |
 | `max_balance` | OZ | Transferred, Created | Max holding per identity | Per offering memorandum |
@@ -104,8 +104,12 @@ Rule source of truth: `docs/compliance-matrix.md` maps **legal rule → module �
 | `submit` | Forward signed transactions to OZ Relayer Channels; track status | Relayer |
 | `vehicles` | Backoffice operations: factory, module config, mint, deposit | contracts |
 | `indexer` | `getEvents` cursor → Postgres; exposes metrics | RPC, DB |
-| `ramp` | SEP-24 interactive URL, status polling ([ADR-004](../adr/ADR-004-usdc-and-sep24-anchor.md)) | anchor |
+| `ramp` | SEP-24 interactive URL, status polling ([ADR-004](../6-decisions/ADR-004-usdc-and-sep24-anchor.md)) | anchor |
 
 ## 4. Error model
 
 Contract errors are numeric `#[contracterror]` codes. The SDK maps them to typed errors; the app shows a plain-language reason (e.g., *"This transfer is not allowed: the recipient is a US person during the Reg S distribution compliance period."*). Codes are documented in `docs/errors.md` and in each contract README.
+
+---
+
+← [3.2 · Containers](2-containers.md) · [Index](../README.md) · [4 · Flows](../4-flows.md) →

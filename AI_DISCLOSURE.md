@@ -11,13 +11,15 @@ This file lists every use of AI-generated or AI-assisted artifacts in this repos
 
 ## Log
 
+Paths are the current ones. On 2026-09-30 the docs were reorganized into numbered folders.
+
 | Date | Artifact | Tool | What the tool did | Reviewed by | Review performed |
 |---|---|---|---|---|---|
-| 2026-09-24 | `docs/architecture/*`, `docs/dataflow.md`, diagrams | Claude (Anthropic) | First draft of text and Mermaid diagrams from the team's technical brief and the OpenZeppelin `stellar-contracts` v0.7.1 source | _technical lead_ | _to complete_ |
-| 2026-09-29 | `docs/architecture/archi/rwaxi-architecture.archimate` | Claude (Anthropic) | Generated the Archi (ArchiMate) model — C4 context, containers and on-chain components views — from `docs/architecture/*.md`; layout is a first pass | _technical lead_ | _to complete: open in Archi, review elements/relations, adjust layout_ |
-| 2026-09-29 | `docs/architecture/RWAXI_Architecture_Diagrams.pdf` | Claude (Anthropic) | Drafted the explanatory document; rebuilt on 2026-09-30 with the twelve Archi exports and shorter text from the technical lead's notes | _technical lead_ | _to complete: review text_ |
-| 2026-09-29 | `docs/architecture/RWAXI_Arquitectura_Diagramas.pdf` | Claude (Anthropic) | Spanish version of the explanatory document, rebuilt on 2026-09-30 with the twelve Archi exports | _technical lead_ | _to complete_ |
-| 2026-09-30 | `docs/architecture/archi/rwaxi-architecture.archimate` (layout), `docs/architecture/diagrams/c4-*.png`, text of `c4-context.md`, `c4-containers.md`, `c4-components.md` §1 and `architecture/README.md` §4 | Claude (Anthropic) | Re-laid out the four views (C4-3 split in two), exported the PNGs with Archi 5.10 and drafted the short explanations from the technical lead's notes | _technical lead_ | _to complete_ |
-| 2026-09-30 | Flow and DFD views in the Archi model, `docs/architecture/diagrams/flow-*.png` and `dfd-*.png`, text of `sequences.md` | Claude (Anthropic) | Moved the five flows and three DFDs from Mermaid to Archi views, exported them and drafted the short explanations | _technical lead_ | _to complete_ |
-| 2026-09-24 | `docs/adr/ADR-001` … `ADR-007` | Claude (Anthropic) | First draft of decision records and option analysis | _technical lead_ | _to complete_ |
+| 2026-09-24 | `docs/2-overview.md`, `docs/3-c4/*`, `docs/4-flows.md`, `docs/5-security.md`, diagrams | Claude (Anthropic) | First draft of text and Mermaid diagrams from the team's technical brief and the OpenZeppelin `stellar-contracts` v0.7.1 source | _technical lead_ | _to complete_ |
+| 2026-09-29 | `docs/7-model/rwaxi-architecture.archimate` | Claude (Anthropic) | Generated the Archi (ArchiMate) model — C4 context, containers and on-chain components views — from the architecture docs; layout is a first pass | _technical lead_ | _to complete: open in Archi, review elements/relations, adjust layout_ |
+| 2026-09-29 | `docs/7-model/RWAXI_Architecture_Diagrams.pdf` | Claude (Anthropic) | Drafted the explanatory document; rebuilt on 2026-09-30 with the twelve Archi exports and shorter text from the technical lead's notes | _technical lead_ | _to complete: review text_ |
+| 2026-09-29 | `docs/7-model/RWAXI_Arquitectura_Diagramas.pdf` | Claude (Anthropic) | Spanish version of the explanatory document, rebuilt on 2026-09-30 with the twelve Archi exports | _technical lead_ | _to complete_ |
+| 2026-09-30 | `docs/7-model/rwaxi-architecture.archimate` (layout), `docs/7-model/diagrams/c4-*.png`, text of `docs/3-c4/*` §1 and `docs/2-overview.md` §4 | Claude (Anthropic) | Re-laid out the four views (C4-3 split in two), exported the PNGs with Archi 5.10 and drafted the short explanations from the technical lead's notes | _technical lead_ | _to complete_ |
+| 2026-09-30 | Flow and DFD views in the Archi model, `docs/7-model/diagrams/flow-*.png` and `dfd-*.png`, text of `docs/4-flows.md` | Claude (Anthropic) | Moved the five flows and three DFDs from Mermaid to Archi views, exported them and drafted the short explanations | _technical lead_ | _to complete_ |
+| 2026-09-24 | `docs/6-decisions/ADR-001` … `ADR-007` | Claude (Anthropic) | First draft of decision records and option analysis | _technical lead_ | _to complete_ |
 | 2026-09-24 | `README.md`, `SECURITY.md`, `CONTRIBUTING.md`, templates | Claude (Anthropic) | First draft | _technical lead_ | _to complete_ |

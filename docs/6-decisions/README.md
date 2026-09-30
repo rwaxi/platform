@@ -1,4 +1,4 @@
-# Architecture Decision Records
+# 6 · Decisions (ADRs)
 
 Format: context · options considered · decision · consequences. Status values: `Proposed` → `Accepted` (signed off by the technical lead) → `Superseded`.
 
@@ -11,3 +11,7 @@ Format: context · options considered · decision · consequences. Status values
 | [005](ADR-005-event-indexer.md) | Own event indexer over Soroban RPC | Proposed |
 | [006](ADR-006-one-token-per-vehicle.md) | One token and compliance set per vehicle, shared identity | Proposed |
 | [007](ADR-007-spike-compliance-rule-reg-s.md) | Spike compliance rule: Reg S distribution compliance period | Proposed |
+
+---
+
+← [5 · Security](../5-security.md) · [Index](../README.md) · [7 · Model and diagrams](../7-model/README.md) →

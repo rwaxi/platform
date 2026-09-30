@@ -1,6 +1,6 @@
-# C4 Level 2: Containers
+# 3.2 · C4 Level 2: Containers
 
-![Containers](diagrams/c4-2-containers.png)
+![Containers](../7-model/diagrams/c4-2-containers.png)
 
 The view has three blocks. On the left, the two clients: the investor app (Expo) and the backoffice (Next.js). In the middle, what runs in our GCP project: API, KYC and claim service, event indexer, Postgres and KMS. At the bottom, the contracts on Soroban.
 
@@ -11,7 +11,7 @@ Some decisions are easier to see here than in the ADRs:
 - Everything goes out through the OZ Relayer (flows 5, 6 and 7), so the investor never needs to buy XLM.
 - The indexer reads contract events from RPC (flow 8) and writes them to Postgres. That database feeds screens and reports. The ledger is the source of truth.
 
-Inside the Stellar box we only list the contracts. How they call each other is in [C4 Level 3](c4-components.md). Source model: [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate).
+Inside the Stellar box we only list the contracts. How they call each other is in [C4 Level 3](3-components.md). Source model: [`../7-model/rwaxi-architecture.archimate`](../7-model/rwaxi-architecture.archimate).
 
 ## Container responsibilities
 
@@ -47,3 +47,7 @@ Inside the Stellar box we only list the contracts. How they call each other is i
 | `mainnet` | Stellar pubnet | T3 launch |
 
 Testnet is periodically reset by SDF; `scripts/deploy.sh` redeploys the full set from scratch and `deployments/testnet.json` keeps historical hashes and screenshots (see task 26 contingency plan).
+
+---
+
+← [3.1 · Context](1-context.md) · [Index](../README.md) · [3.3 · Components](3-components.md) →

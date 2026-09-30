@@ -1,12 +1,12 @@
-# C4 Level 1: System Context
+# 3.1 · C4 Level 1: System context
 
-![System context](diagrams/c4-1-context.png)
+![System context](../7-model/diagrams/c4-1-context.png)
 
 Three people sit around the platform: the investor, the RWAXI operator and the securities counsel. Counsel never touches the system. They hand the operator a written rule set, and the operator turns it into module configuration on the token.
 
 Anything that moves money or ownership ends on Stellar. The platform prepares the transaction, the OZ Relayer submits it and pays the fee, and the result is public in Stellar Expert, where a reviewer can check it without asking us. KYC and the COP ramp stay with licensed providers on purpose. We don't want to hold identity documents or fiat.
 
-Colors: yellow for people, blue for what we build or configure, orange for contracts we write ourselves, grey for systems we don't control. The picture is exported from the Archi model in [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate).
+Colors: yellow for people, blue for what we build or configure, orange for contracts we write ourselves, grey for systems we don't control. The picture is exported from the Archi model in [`../7-model/rwaxi-architecture.archimate`](../7-model/rwaxi-architecture.archimate).
 
 ## Actors
 
@@ -31,3 +31,7 @@ Colors: yellow for people, blue for what we build or configure, orange for contr
 - No custody of investor keys: passkeys stay in the device secure enclave.
 - No fiat handling: fiat enters and leaves only through a licensed anchor.
 - No personal data on-chain.
+
+---
+
+← [2 · Overview](../2-overview.md) · [Index](../README.md) · [3.2 · Containers](2-containers.md) →

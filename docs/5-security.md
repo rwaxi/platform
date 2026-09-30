@@ -1,4 +1,4 @@
-# Data Flow Diagram and Trust Boundaries
+# 5 · Security: data flows and trust boundaries
 
 > Status: **Draft v0.1** · 2026-09-24
 > Purpose: answer *"What are we working on?"* in the Stellar threat-modeling process ([How-To Guide](https://developers.stellar.org/docs/build/security-docs/threat-modeling/threat-modeling-how-to)). This is the input to the STRIDE threat model (`threat-model.md`) and to the Tranche 2 monitoring plan (`monitoring.md`), and it covers the "Dataflow Diagram" item of the Audit Bank readiness checklist.
@@ -17,15 +17,15 @@ Notation, as defined by the How-To Guide:
 
 ## 1. System DFD (full platform, target architecture)
 
-Split in two views so the flows stay readable. Flow IDs are shared between both views and the tables in §4. The three DFDs are views of the Archi model ([`architecture/archi/rwaxi-architecture.archimate`](architecture/archi/rwaxi-architecture.archimate)).
+Split in two views so the flows stay readable. Flow IDs are shared between both views and the tables in §4. The three DFDs are views of the Archi model ([`7-model/rwaxi-architecture.archimate`](7-model/rwaxi-architecture.archimate)).
 
 ### 1a. Off-chain view (TB1–TB4, TB6)
 
-![dfd-1a-offchain](architecture/diagrams/dfd-1a-offchain.png)
+![dfd-1a-offchain](7-model/diagrams/dfd-1a-offchain.png)
 
 ### 1b. On-chain view (TB5)
 
-![dfd-1b-onchain](architecture/diagrams/dfd-1b-onchain.png)
+![dfd-1b-onchain](7-model/diagrams/dfd-1b-onchain.png)
 
 ---
 
@@ -33,7 +33,7 @@ Split in two views so the flows stay readable. Flow IDs are shared between both 
 
 The spike has no app, backend or third parties. A developer operates it with the Stellar CLI.
 
-![dfd-2-spike](architecture/diagrams/dfd-2-spike.png)
+![dfd-2-spike](7-model/diagrams/dfd-2-spike.png)
 
 ---
 
@@ -106,3 +106,7 @@ The spike has no app, backend or third parties. A developer operates it with the
 2. Country codes on-chain (DS6) are acceptable to counsel from a privacy standpoint for the target jurisdictions (Colombia Law 1581, U.S.).
 3. The relayer managed service (D10–D11) accepts signed Soroban invocations with smart-account auth entries.
 4. The spike keys (TB-A) are testnet-only and are never reused on mainnet.
+
+---
+
+← [4 · Flows](4-flows.md) · [Index](README.md) · [6 · Decisions](6-decisions/README.md) →

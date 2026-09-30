@@ -1,23 +1,30 @@
 # Summary
 
 * [Introduction](README.md)
+* [2 · Architecture overview](2-overview.md)
 
-## Architecture
+## 3 · C4 model
 
-* [Overview](architecture/README.md)
-* [C4 · Context](architecture/c4-context.md)
-* [C4 · Containers](architecture/c4-containers.md)
-* [C4 · Components](architecture/c4-components.md)
-* [Critical flows](architecture/sequences.md)
-* [Data flow and trust boundaries](dataflow.md)
+* [3.1 · Context](3-c4/1-context.md)
+* [3.2 · Containers](3-c4/2-containers.md)
+* [3.3 · Components](3-c4/3-components.md)
 
-## Decisions
+## 4 to 5 · Behaviour and security
 
-* [ADR index](adr/README.md)
-* [ADR-001 · OpenZeppelin RWA module](adr/ADR-001-openzeppelin-rwa-module.md)
-* [ADR-002 · Smart accounts with passkeys](adr/ADR-002-smart-accounts-passkeys.md)
-* [ADR-003 · Fee sponsorship](adr/ADR-003-fee-sponsorship-oz-relayer.md)
-* [ADR-004 · USDC and SEP-24](adr/ADR-004-usdc-and-sep24-anchor.md)
-* [ADR-005 · Event indexer](adr/ADR-005-event-indexer.md)
-* [ADR-006 · One token per vehicle](adr/ADR-006-one-token-per-vehicle.md)
-* [ADR-007 · Reg S compliance rule](adr/ADR-007-spike-compliance-rule-reg-s.md)
+* [4 · Critical flows](4-flows.md)
+* [5 · Data flows and trust boundaries](5-security.md)
+
+## 6 · Decisions
+
+* [ADR index](6-decisions/README.md)
+* [ADR-001 · OpenZeppelin RWA module](6-decisions/ADR-001-openzeppelin-rwa-module.md)
+* [ADR-002 · Smart accounts with passkeys](6-decisions/ADR-002-smart-accounts-passkeys.md)
+* [ADR-003 · Fee sponsorship](6-decisions/ADR-003-fee-sponsorship-oz-relayer.md)
+* [ADR-004 · USDC and SEP-24](6-decisions/ADR-004-usdc-and-sep24-anchor.md)
+* [ADR-005 · Event indexer](6-decisions/ADR-005-event-indexer.md)
+* [ADR-006 · One token per vehicle](6-decisions/ADR-006-one-token-per-vehicle.md)
+* [ADR-007 · Reg S compliance rule](6-decisions/ADR-007-spike-compliance-rule-reg-s.md)
+
+## 7 · Model
+
+* [7 · Model and diagrams](7-model/README.md)

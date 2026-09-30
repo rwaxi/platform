@@ -14,7 +14,7 @@
 - Unit tests for every new rule, including boundary cases.
 - `cargo fmt --check`, `cargo clippy -- -D warnings` and `cargo test` pass locally.
 - Any testnet deploy records contract IDs and transaction hashes in `deployments/testnet.json`.
-- Non-obvious design decisions get an ADR in `docs/adr/`.
+- Non-obvious design decisions get an ADR in `docs/6-decisions/`.
 
 ## AI-assisted contributions
 
