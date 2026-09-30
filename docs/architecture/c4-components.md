@@ -1,62 +1,24 @@
-# C4 Level 3 — Components
+# C4 Level 3: Components
 
-## 1. On-chain component map
+## 1. On-chain components
 
-```mermaid
-flowchart LR
-  classDef oz fill:#1168bd,stroke:#0b4884,color:#fff
-  classDef custom fill:#e8833a,stroke:#b5621f,color:#fff
-  classDef ext fill:#8a8a8a,stroke:#6b6b6b,color:#fff
+This level is split in two views. With every contract in one picture the lines ended up crossing each other and nobody could follow them.
 
-  SA["<b>Investor smart account</b><br/><i>OZ stellar-accounts · passkey</i>"]:::oz
-  FAC["<b>vehicle-factory</b><br/><i>custom · shared</i>"]:::custom
+### 1.1 Vehicle contracts
 
-  subgraph VEH["Per vehicle · deployed by vehicle-factory"]
-    SUB["<b>subscription</b><br/><i>custom</i>"]:::custom
-    TOK["<b>rwa-token</b><br/><i>OZ RWAToken</i>"]:::oz
-    DIS["<b>distribution</b><br/><i>custom</i>"]:::custom
-    CMP["<b>compliance dispatcher</b><br/><i>OZ Compliance</i>"]:::oz
-  end
+![Vehicle contracts](diagrams/c4-3a-vehicle-contracts.png)
 
-  subgraph MOD["Compliance modules · config per token"]
-    REGS["<b>reg-s-distribution-period</b><br/><i>custom</i>"]:::custom
-    CR["<b>country_restrict</b> · OZ"]:::oz
-    LOCK["<b>initial_lockup_period</b> · OZ"]:::oz
-    MAXB["<b>max_balance</b> · OZ"]:::oz
-    SUP["<b>supply_limit</b> · OZ"]:::oz
-    CKP["<b>balance-checkpoint</b><br/><i>custom · bookkeeping</i>"]:::custom
-  end
+Each investment vehicle gets its own set, deployed by `vehicle-factory` ([ADR-006](../adr/ADR-006-one-token-per-vehicle.md)). The investor's smart account talks to three contracts: `subscription` to pay in USDC during the offering, `rwa-token` to transfer after issuance, and `distribution` to claim payouts. Tokens are minted by `subscription` when the offering closes. Nobody mints by hand.
 
-  subgraph ID["Identity stack · shared across vehicles"]
-    IDV["<b>identity-verifier</b><br/><i>OZ</i>"]:::oz
-    IRS["<b>identity-registry-storage</b><br/><i>OZ · wallet → identity + country</i>"]:::oz
-    CTI["<b>claim-topics-and-issuers</b><br/><i>OZ</i>"]:::oz
-    IDC["<b>identity contract</b><br/><i>OZ · one per investor</i>"]:::oz
-    CI["<b>claim-issuer</b><br/><i>OZ</i>"]:::oz
-  end
+### 1.2 Compliance and identity
 
-  USDC["<b>USDC</b><br/><i>Stellar Asset Contract</i>"]:::ext
+![Compliance and identity](diagrams/c4-3b-compliance-identity.png)
 
-  FAC -. "0 · deploys" .-> TOK
-  SA -- "1 · subscribe" --> SUB
-  SA -- "2 · transfer" --> TOK
-  SA -- "3 · claim" --> DIS
-  SUB -- "4 · mint at close" --> TOK
-  TOK -- "5 · hooks" --> CMP
-  CMP -- "6 · dispatch" --> REGS
-  CMP --> CR & LOCK & MAXB & SUP & CKP
-  TOK -- "7 · verify_identity" --> IDV
-  REGS -- "8 · country data" --> IRS
-  CR -- "8" --> IRS
-  IDV --> IRS
-  IDV --> CTI
-  IDV --> IDC --> CI
-  DIS -- "9 · entitlement" --> CKP
-  SUB -- "10 · USDC" --> USDC
-  DIS -- "10 · USDC" --> USDC
-```
+This is what makes it a security token. On every transfer, mint and burn, `rwa-token` asks `identity-verifier` whether both wallets have valid claims, then calls its hooks on the compliance dispatcher, which runs the modules set for that vehicle. If one module says no, the whole transaction reverts.
 
-Legend: blue = OpenZeppelin `stellar-contracts` (configured), orange = RWAXI custom code, grey = external asset.
+Most modules come from OpenZeppelin and we only configure them. We write two: `reg-s-distribution-period` ([ADR-007](../adr/ADR-007-spike-compliance-rule-reg-s.md), the rule we prove in the spike) and `balance-checkpoint`, which `distribution` uses to know who held what on the record date. `reg-s-distribution-period` and `country_restrict` read the investor's country from `identity-registry-storage`.
+
+Colors: yellow for people, blue for what we build or configure, orange for contracts we write ourselves, grey for systems we don't control. Source model: [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate).
 
 ## 2. Contracts
 

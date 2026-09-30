@@ -43,52 +43,18 @@ Three scopes must never be mixed, because SCF does not reimburse work done befor
 
 ## 4. Architecture at a glance
 
-```mermaid
-flowchart LR
-  subgraph Users
-    INV[Investor<br/>mobile app]
-    OPS[RWAXI operator<br/>backoffice]
-  end
-  subgraph OffChain[RWAXI off-chain · GCP]
-    API[Platform API<br/>NestJS]
-    KYC[KYC & claim service]
-    IDX[Event indexer]
-    DB[(PostgreSQL)]
-    KMS[[Secret Manager / KMS<br/>claim-issuer key]]
-  end
-  subgraph Stellar[Stellar network · Soroban]
-    SA[Investor smart account<br/>passkey signer]
-    TOK[RWA token<br/>per vehicle]
-    IDV[Identity verifier<br/>+ registry + claims]
-    CMP[Compliance dispatcher<br/>+ modules]
-    SUB[Subscription]
-    DIS[Distribution]
-    USDC[USDC SAC]
-  end
-  REL[OZ Relayer<br/>Channels]
-  PROV[KYC provider]
-  ANC[SEP-24 anchor<br/>COP↔USDC]
+![Containers](diagrams/c4-2-containers.png)
 
-  INV -->|WebAuthn| SA
-  INV --> API
-  OPS --> API
-  API --> REL --> Stellar
-  KYC --> PROV
-  KYC -->|signed claim| IDV
-  KYC -.-> KMS
-  SA --> TOK
-  SA --> SUB
-  SA --> DIS
-  TOK --> IDV
-  TOK --> CMP
-  SUB --> USDC
-  DIS --> USDC
-  IDX -->|getEvents| Stellar
-  IDX --> DB
-  API --> DB
-  INV -. deposit/withdraw .-> ANC
-```
+All the diagrams come from a single Archi model, [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate), so the four views use the same names. When the architecture changes, change the model first and export again. Don't edit the PNGs.
 
+| View | What it answers |
+|---|---|
+| [C4-1 System context](c4-context.md) | Who uses RWAXI and which outside systems we depend on |
+| [C4-2 Containers](c4-containers.md) | What we deploy, where it runs and how the pieces talk |
+| [C4-3a Vehicle contracts](c4-components.md#11-vehicle-contracts) | Which contracts each vehicle gets |
+| [C4-3b Compliance and identity](c4-components.md#12-compliance-and-identity) | How a transfer is checked before it settles |
+
+To export: open the model in Archi 5 and use *Report › HTML*, or run `Archi -application com.archimatetool.commandline.app --loadModel archi/rwaxi-architecture.archimate --html.createReport <dir>` and copy the view images to `diagrams/`.
 ## 5. Components by tranche
 
 | Component | Spike 2026 | T1 · MVP (testnet) | T2 · Full product (testnet) | T3 · Mainnet |

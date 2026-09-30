@@ -1,70 +1,17 @@
-# C4 Level 2 — Containers
+# C4 Level 2: Containers
 
-```mermaid
-flowchart LR
-  classDef person fill:#08427b,stroke:#052e56,color:#fff
-  classDef cont fill:#438dd5,stroke:#2e6295,color:#fff
-  classDef chain fill:#1168bd,stroke:#0b4884,color:#fff
-  classDef db fill:#438dd5,stroke:#2e6295,color:#fff
-  classDef ext fill:#8a8a8a,stroke:#6b6b6b,color:#fff
+![Containers](diagrams/c4-2-containers.png)
 
-  INV["<b>Investor</b>"]:::person
-  OPS["<b>RWAXI operator</b>"]:::person
+The view has three blocks. On the left, the two clients: the investor app (Expo) and the backoffice (Next.js). In the middle, what runs in our GCP project: API, KYC and claim service, event indexer, Postgres and KMS. At the bottom, the contracts on Soroban.
 
-  subgraph CLIENTS["Clients"]
-    direction TB
-    APP["<b>Investor app</b><br/><i>[React Native · Expo]</i><br/>Passkey, KYC, subscribe, claim"]:::cont
-    BO["<b>Backoffice</b><br/><i>[Next.js]</i><br/>Vehicles, approvals, payouts"]:::cont
-  end
+Some decisions are easier to see here than in the ADRs:
 
-  subgraph GCP["RWAXI off-chain · GCP"]
-    direction TB
-    API["<b>Platform API</b><br/><i>[NestJS · OpenAPI]</i><br/>Builds + simulates tx"]:::cont
-    KYCS["<b>KYC & claim service</b><br/><i>[NestJS]</i><br/>Maps KYC → claims"]:::cont
-    IDX["<b>Event indexer</b><br/><i>[Node worker]</i><br/>getEvents → DB"]:::cont
-    DB[("<b>Platform DB</b><br/><i>[PostgreSQL]</i>")]:::db
-    KMS["<b>KMS</b><br/><i>[GCP]</i><br/>Claim-issuer key"]:::cont
-  end
+- The investor signs with a passkey on the phone (flow 9). The API builds and simulates transactions, but it never holds an investor key.
+- Only the KYC and claim service can use the claim-signing key in KMS (flow 4). A compromised API still can't issue identities.
+- Everything goes out through the OZ Relayer (flows 5, 6 and 7), so the investor never needs to buy XLM.
+- The indexer reads contract events from RPC (flow 8) and writes them to Postgres. That database feeds screens and reports. The ledger is the source of truth.
 
-  REL["<b>OZ Relayer · Channels</b><br/><i>[External]</i><br/>Pays fees"]:::ext
-  PROV["<b>KYC provider</b><br/><i>[External]</i>"]:::ext
-  ANC["<b>SEP-24 anchor</b><br/><i>[External]</i>"]:::ext
-
-  subgraph CHAIN["Stellar · Soroban"]
-    direction TB
-    SA["<b>Smart account</b><br/><i>[OZ accounts]</i><br/>One per investor · passkey"]:::chain
-    subgraph VEH["Per vehicle"]
-      direction TB
-      TOK["<b>rwa-token</b><br/><i>[OZ RWA]</i>"]:::chain
-      CMP["<b>Compliance</b><br/><i>[OZ + custom modules]</i>"]:::chain
-      SUB["<b>subscription</b><br/><i>[custom]</i>"]:::chain
-      DIS["<b>distribution</b><br/><i>[custom]</i>"]:::chain
-    end
-    IDS["<b>Identity stack</b><br/><i>[OZ · shared]</i><br/>Registry, claims, verifier"]:::chain
-    FAC["<b>vehicle-factory</b><br/><i>[custom · shared]</i>"]:::chain
-    USDC["<b>USDC</b><br/><i>[Stellar Asset Contract]</i>"]:::chain
-  end
-
-  INV --> APP
-  OPS --> BO
-  APP -- "1 · HTTPS" --> API
-  BO -- "2 · HTTPS" --> API
-  API --- DB
-  IDX --- DB
-  KYCS -- "3 · sessions" --> PROV
-  KYCS -- "4 · sign claim" --> KMS
-  API -- "5 · signed tx" --> REL
-  KYCS -- "6 · claim tx" --> REL
-  REL -- "7 · submit" --> CHAIN
-  IDX -. "8 · getEvents" .-> CHAIN
-  APP -. "9 · passkey signature" .-> SA
-  APP -. "10 · COP ramp" .-> ANC
-  SA -- "11 · transfer · subscribe · claim" --> VEH
-  TOK -- "12 · hooks" --> CMP
-  VEH -- "13 · verify_identity<br/>country data" --> IDS
-  VEH -- "14 · USDC" --> USDC
-  FAC -. "15 · deploys" .-> VEH
-```
+Inside the Stellar box we only list the contracts. How they call each other is in [C4 Level 3](c4-components.md). Source model: [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate).
 
 ## Container responsibilities
 

@@ -1,37 +1,12 @@
-# C4 Level 1 — System Context
+# C4 Level 1: System Context
 
-```mermaid
-flowchart LR
-  classDef person fill:#08427b,stroke:#052e56,color:#fff
-  classDef system fill:#1168bd,stroke:#0b4884,color:#fff
-  classDef ext fill:#8a8a8a,stroke:#6b6b6b,color:#fff
+![System context](diagrams/c4-1-context.png)
 
-  INV["<b>Investor</b><br/><i>[Person]</i><br/>Colombian or international.<br/>Passkey, KYC, USDC."]:::person
-  OPS["<b>RWAXI operator</b><br/><i>[Person]</i><br/>Creates vehicles, approves<br/>investors, mints, pays out."]:::person
-  LAW["<b>Securities counsel</b><br/><i>[Person]</i><br/>Defines transfer rules<br/>per vehicle."]:::person
+Three people sit around the platform: the investor, the RWAXI operator and the securities counsel. Counsel never touches the system. They hand the operator a written rule set, and the operator turns it into module configuration on the token.
 
-  RWAXI["<b>RWAXI Platform</b><br/><i>[Software system]</i><br/>Issues and administers regulated<br/>RWA security tokens with<br/>on-chain compliance."]:::system
-  ANC["<b>SEP-24 anchor</b><br/><i>[External]</i><br/>COP ↔ USDC"]:::ext
+Anything that moves money or ownership ends on Stellar. The platform prepares the transaction, the OZ Relayer submits it and pays the fee, and the result is public in Stellar Expert, where a reviewer can check it without asking us. KYC and the COP ramp stay with licensed providers on purpose. We don't want to hold identity documents or fiat.
 
-  KYC["<b>KYC/KYB provider</b><br/><i>[External]</i><br/>Documents, liveness, AML"]:::ext
-  REL["<b>OZ Relayer · Channels</b><br/><i>[External]</i><br/>Submits tx, pays fees"]:::ext
-
-  XLM["<b>Stellar network</b><br/><i>[External · Soroban]</i><br/>Token, identity and compliance<br/>contracts · USDC settlement"]:::ext
-  EXP["<b>Stellar Expert</b><br/><i>[External]</i><br/>Public verification"]:::ext
-
-  LAW -. "1 · rule set" .-> OPS
-  INV -- "2 · onboard, subscribe, claim<br/>[app + passkey]" --> RWAXI
-  OPS -- "3 · manage vehicles<br/>[backoffice]" --> RWAXI
-  INV -. "4 · deposit / withdraw COP" .-> ANC
-  RWAXI -- "5 · KYC sessions<br/>[HTTPS + webhook]" --> KYC
-  RWAXI -- "6 · signed tx" --> REL
-  REL -- "7 · submit" --> XLM
-  RWAXI -- "8 · read state, events<br/>[Soroban RPC]" --> XLM
-  ANC -- "9 · USDC" --> XLM
-  XLM -. "10 · indexed by" .-> EXP
-```
-
-Legend: dark blue = people, blue = RWAXI, grey = external systems. Dotted lines are indirect or off-system relations.
+Colors: yellow for people, blue for what we build or configure, orange for contracts we write ourselves, grey for systems we don't control. The picture is exported from the Archi model in [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate).
 
 ## Actors
 
