@@ -41,10 +41,6 @@ Built on [OpenZeppelin `stellar-contracts`](https://github.com/OpenZeppelin/stel
 
 Smart contracts and SDK are released under the [Apache License 2.0](LICENSE).
 
-## AI disclosure
-
-See [AI_DISCLOSURE.md](AI_DISCLOSURE.md).
-
 ## Security
 
 See [SECURITY.md](SECURITY.md). Do not open public issues for vulnerabilities.
