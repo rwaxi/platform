@@ -8,137 +8,24 @@ Notation, as defined by the How-To Guide:
 | Element | Meaning | Shape in the diagram |
 |---|---|---|
 | **External entity** | Outside RWAXI's control | grey rectangle |
-| **Process** | Code or systems RWAXI controls | blue rounded box (orange = RWAXI custom contract) |
-| **Data store** | Where data is stored, including Soroban contract storage | cylinder |
+| **Process** | Code or systems RWAXI controls | blue box (orange = RWAXI custom contract) |
+| **Data store** | Where data is stored, including Soroban contract storage | white box with the data icon (`DSn`) |
 | **Data flow** | Data moving between elements | numbered arrow `Dn` |
-| **Trust boundary** | Group where trust assumptions change | red dashed box `TBn` |
+| **Trust boundary** | Group where trust assumptions change | dashed group labelled `TBn` |
 
 ---
 
 ## 1. System DFD (full platform, target architecture)
 
-Split in two views so the flows stay readable. Flow IDs are shared between both views and the tables in §4.
+Split in two views so the flows stay readable. Flow IDs are shared between both views and the tables in §4. The three DFDs are views of the Archi model ([`architecture/archi/rwaxi-architecture.archimate`](architecture/archi/rwaxi-architecture.archimate)).
 
 ### 1a. Off-chain view (TB1–TB4, TB6)
 
-```mermaid
-flowchart LR
-  classDef ext fill:#8a8a8a,stroke:#6b6b6b,color:#fff
-  classDef proc fill:#1168bd,stroke:#0b4884,color:#fff
-  classDef store fill:#f4f4f4,stroke:#555,color:#222
-
-  subgraph TB1["TB1 · Investor device"]
-    INV["Investor"]:::ext
-    APP("Investor app"):::proc
-    PK[("DS1 · Passkey key<br/>secure enclave")]:::store
-  end
-
-  subgraph TB2["TB2 · Operator workstation"]
-    OPS["RWAXI operator"]:::ext
-    BO("Backoffice"):::proc
-    AGK[("DS10 · Agent / admin signer<br/>hardware key · multisig")]:::store
-  end
-
-  subgraph TB3["TB3 · RWAXI cloud (GCP)"]
-    API("Platform API"):::proc
-    KYCS("KYC & claim service"):::proc
-    IDX("Event indexer"):::proc
-    DB[("DS2 · PostgreSQL")]:::store
-    SM[("DS4 · Secret Manager")]:::store
-    subgraph TB4["TB4 · KMS"]
-      KMS[("DS3 · Claim-issuer key")]:::store
-    end
-  end
-
-  subgraph TB6["TB6 · Third-party services"]
-    PROV["KYC provider"]:::ext
-    PDOCS[("DS9 · ID documents")]:::store
-    REL["OZ Relayer · Channels"]:::ext
-    ANC["SEP-24 anchor"]:::ext
-  end
-
-  XLM["TB5 · Stellar network<br/>(detail in §2)"]:::ext
-
-  INV -- "D1" --> APP
-  APP -- "D2 · WebAuthn" --> PK
-  APP -- "D3 · requests, signed auth" --> API
-  APP -- "D4 · documents, selfie" --> PROV
-  PROV --- PDOCS
-  PROV -- "D5 · signed webhook" --> KYCS
-  KYCS -- "D6 · sign claim" --> KMS
-  KYCS -- "D7" --> DB
-  API -- "D8" --> DB
-  API --- SM
-  API -- "D10 · signed tx" --> REL
-  KYCS -- "D10 · claim tx" --> REL
-  REL -- "D11 · submit" --> XLM
-  API -- "D9 · simulate" --> XLM
-  XLM -. "D17 · events" .-> IDX
-  IDX -- "D18" --> DB
-  OPS -- "D19 · SSO" --> BO
-  BO -- "D20 · admin requests" --> API
-  BO -- "D21 · tx to sign" --> AGK
-  APP -. "D22 · SEP-24 · PII" .-> ANC
-  ANC -. "D23 · USDC" .-> XLM
-
-  style TB1 fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-  style TB2 fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-  style TB3 fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-  style TB4 fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-  style TB6 fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-```
-
-Image: [`architecture/diagrams/dfd-1a-offchain.png`](architecture/diagrams/dfd-1a-offchain.png)
+![dfd-1a-offchain](architecture/diagrams/dfd-1a-offchain.png)
 
 ### 1b. On-chain view (TB5)
 
-```mermaid
-flowchart LR
-  classDef ext fill:#8a8a8a,stroke:#6b6b6b,color:#fff
-  classDef proc fill:#1168bd,stroke:#0b4884,color:#fff
-  classDef custom fill:#e8833a,stroke:#b5621f,color:#fff
-  classDef store fill:#f4f4f4,stroke:#555,color:#222
-
-  REL["OZ Relayer<br/>(TB6)"]:::ext
-  ANC["SEP-24 anchor<br/>(TB6)"]:::ext
-
-  subgraph TB5["TB5 · Stellar network · public ledger"]
-    SA("Smart account"):::proc
-    SUBD("subscription /<br/>distribution"):::custom
-    TOK("rwa-token"):::proc
-    DS5[("DS5 · Balances,<br/>frozen, allowances")]:::store
-    IDV("Identity verifier"):::proc
-    DS6[("DS6 · Identity registry<br/>wallet → identity, country")]:::store
-    DS7[("DS7 · Signed claims")]:::store
-    CMP("Compliance dispatcher"):::proc
-    REGS("reg-s module +<br/>OZ modules"):::custom
-    DS8[("DS8 · Module config<br/>and state")]:::store
-  end
-
-  IDX["Event indexer<br/>(TB3)"]:::ext
-  PUB["Public · Stellar Expert"]:::ext
-
-  REL -- "D11 · submit" --> SA
-  REL -- "D11 · claim tx" --> IDV
-  ANC -. "D23 · USDC" .-> SA
-  SA -- "D12 · transfer" --> TOK
-  SA -- "D12 · subscribe, claim" --> SUBD
-  SUBD -- "D16 · mint" --> TOK
-  TOK --- DS5
-  TOK -- "D13 · verify_identity" --> IDV
-  IDV --- DS6
-  IDV --- DS7
-  TOK -- "D14 · hooks" --> CMP
-  CMP --> REGS
-  REGS --- DS8
-  REGS -- "D15 · country" --> DS6
-  TOK -. "D17 · events" .-> IDX
-  DS5 -. "D24 · public" .-> PUB
-
-  style TB5 fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-```
-
-Image: [`architecture/diagrams/dfd-1b-onchain.png`](architecture/diagrams/dfd-1b-onchain.png)
+![dfd-1b-onchain](architecture/diagrams/dfd-1b-onchain.png)
 
 ---
 
@@ -146,49 +33,7 @@ Image: [`architecture/diagrams/dfd-1b-onchain.png`](architecture/diagrams/dfd-1b
 
 The spike has no app, backend or third parties. A developer operates it with the Stellar CLI.
 
-```mermaid
-flowchart LR
-  classDef ext fill:#8a8a8a,stroke:#6b6b6b,color:#fff
-  classDef proc fill:#1168bd,stroke:#0b4884,color:#fff
-  classDef custom fill:#e8833a,stroke:#b5621f,color:#fff
-  classDef store fill:#f4f4f4,stroke:#555,color:#222
-
-  subgraph TBA["TB-A · Developer machine / CI runner"]
-    DEV["Developer"]:::ext
-    CLI("Stellar CLI ·<br/>demo script"):::proc
-    KEYS[("Testnet keys<br/>admin, issuer, A, B, C")]:::store
-  end
-
-  subgraph TBB["TB-B · Stellar testnet · public"]
-    TOK("rwa-token"):::proc
-    IDV("Identity verifier"):::proc
-    CMP("Compliance dispatcher"):::proc
-    REGS("reg-s-distribution-period"):::custom
-    BAL[("Balances")]:::store
-    IRS[("Identity registry<br/>A=CO · B=US · C=CO")]:::store
-    CFG[("Module config<br/>period_end_ledger")]:::store
-  end
-
-  EXP["Stellar Expert"]:::ext
-
-  DEV --> CLI
-  CLI -- "S1 · sign" --> KEYS
-  CLI -- "S2 · deploy, configure, register identities" --> TOK
-  CLI -- "S3 · transfer A→B, A→C" --> TOK
-  TOK --- BAL
-  TOK -- "S4 · verify_identity" --> IDV
-  IDV --- IRS
-  TOK -- "S5 · on_transfer" --> CMP
-  CMP --> REGS
-  REGS -- "S6 · country of recipient" --> IRS
-  REGS --- CFG
-  TBB -. "S7 · tx hashes, contract IDs" .-> EXP
-
-  style TBA fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-  style TBB fill:none,stroke:#c0392b,stroke-width:2px,stroke-dasharray:6 4
-```
-
-Image: [`architecture/diagrams/dfd-2-spike.png`](architecture/diagrams/dfd-2-spike.png)
+![dfd-2-spike](architecture/diagrams/dfd-2-spike.png)
 
 ---
 

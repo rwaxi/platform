@@ -21,7 +21,7 @@ Regulated real-world-asset (RWA) security tokens on Stellar, with securities-law
 
 Every `transfer`, `mint` and `burn` on the token verifies the identity of both parties against on-chain claims and then runs the vehicle's compliance modules in the same transaction. If any check fails, the whole operation reverts.
 
-![Compliance-checked transfer](docs/architecture/diagrams/seq-1-compliance-transfer.png)
+![Compliance-checked transfer](docs/architecture/diagrams/flow-1-compliance-transfer.png)
 
 ## Architecture
 

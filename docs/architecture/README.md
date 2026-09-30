@@ -45,7 +45,7 @@ Three scopes must never be mixed, because SCF does not reimburse work done befor
 
 ![Containers](diagrams/c4-2-containers.png)
 
-All the diagrams come from a single Archi model, [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate), so the four views use the same names. When the architecture changes, change the model first and export again. Don't edit the PNGs.
+All the diagrams come from a single Archi model, [`archi/rwaxi-architecture.archimate`](archi/rwaxi-architecture.archimate), so all twelve views use the same names. When the architecture changes, change the model first and export again. Don't edit the PNGs.
 
 | View | What it answers |
 |---|---|
@@ -53,6 +53,8 @@ All the diagrams come from a single Archi model, [`archi/rwaxi-architecture.arch
 | [C4-2 Containers](c4-containers.md) | What we deploy, where it runs and how the pieces talk |
 | [C4-3a Vehicle contracts](c4-components.md#11-vehicle-contracts) | Which contracts each vehicle gets |
 | [C4-3b Compliance and identity](c4-components.md#12-compliance-and-identity) | How a transfer is checked before it settles |
+| [Flows 1 to 5](sequences.md) | Transfer, onboarding, subscription, distribution and recovery, step by step |
+| [DFD 1a, 1b and 2](../dataflow.md) | Where data goes and which trust boundary it crosses (input to the threat model) |
 
 To export: open the model in Archi 5 and use *Report › HTML*, or run `Archi -application com.archimatetool.commandline.app --loadModel archi/rwaxi-architecture.archimate --html.createReport <dir>` and copy the view images to `diagrams/`.
 ## 5. Components by tranche
