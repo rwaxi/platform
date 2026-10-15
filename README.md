@@ -18,14 +18,14 @@ Every `transfer`, `mint` and `burn` checks the identity of both parties against 
 
 How the rule works: `reg-s-distribution-period` is a compliance module registered on the `CanTransfer` and `CanCreate` hooks. While the ledger sequence is below `period_end_ledger`, it answers `false` when the recipient's identity record shows a U.S. residence, and the token reverts with `TransferNotCompliant` (error 305). After that ledger it allows everything. Rule and rationale: [ADR-007](docs/6-decisions/ADR-007-spike-compliance-rule-reg-s.md).
 
-**Verify it in two minutes.** Addresses are in [`deployments/testnet.json`](deployments/testnet.json).
+**Verify it in two minutes.** Every contract below was deployed from the [`v0.1.1` release](https://github.com/rwaxi/platform/releases) artifacts, and Stellar Expert shows each one as a verified build of this repository (SEP-55). All addresses are in [`deployments/testnet.json`](deployments/testnet.json).
 
 | Verify on Stellar testnet | Link |
 |---|---|
-| RWA token contract (`ABF1`) | [CBMQN2JP…D5YXKRY](https://stellar.expert/explorer/testnet/contract/CBMQN2JPENCFMPDXG7GZD3EK7EEJIQQOEY5L573OHCUZJSCG6D5YXKRY) |
-| Compliance dispatcher | [CBCH42NZ…FL5YRVR5U7ZLDCV](https://stellar.expert/explorer/testnet/contract/CBCH42NZWRKGDQLVVJHS27JZ7HDNX3YRQTEEWNCLQFL5YRVR5U7ZLDCV) |
-| Reg S module | [CBFKRPFC…ITOSFVWV5FO4A2](https://stellar.expert/explorer/testnet/contract/CBFKRPFCVRF5COACIIRWMTH4G4PGACXKXAUBBJKUZITTOSFVWV5FO4A2) |
-| ✅ Transfer allowed (Colombia → Colombia) | [transaction 29c1c4cf…b9f8d1](https://stellar.expert/explorer/testnet/tx/29c1c4cf30b10f1a4b271cb1575e1736106ac6196cd99892c7797b7f6ab9f8d1) |
+| RWA token contract (`ABF1`) | [CDKWYFYW…KC7FLUIFH](https://stellar.expert/explorer/testnet/contract/CDKWYFYWDFH43BJ3SZBHQ3MCHZHUZFLUA2UE3KI3HN5R6UYKC7FLUIFH) |
+| Compliance dispatcher | [CAXPI7GC…Y4Z6QZWNEM](https://stellar.expert/explorer/testnet/contract/CAXPI7GCY7ZZJ3CNIVQA5A76I6TYC6NBNS44M4USMBNG32Y4Z6QZWNEM) |
+| Reg S module | [CDDOEBLE…MMX6BVOULQ](https://stellar.expert/explorer/testnet/contract/CDDOEBLE5NA65DIQIMRCJTHYDESMK5STN4WT3XLDAXQ3ENMMX6BVOULQ) |
+| ✅ Transfer allowed (Colombia → Colombia) | [transaction ed49b5e9…ceba3fe](https://stellar.expert/explorer/testnet/tx/ed49b5e9d4d65f8d787c935e847fe967bf7c6a576b2231420cffe8d12ceba3fe) |
 | ❌ Transfer blocked (Colombia → U.S. resident) | Rejected when the network simulates the transaction, so nothing is written to the ledger and there is no hash. The demo script prints the contract error `#305` and the module's `can_transfer → false`. |
 | Reproduce both with one command | `./scripts/demo-blocked-transfer.sh` |
 
@@ -89,7 +89,6 @@ The identity and token contracts are adapted from OpenZeppelin's examples (MIT, 
 
 ## What comes next
 
-- `v0.1.0` release with a verified build (SEP-55) and a testnet deployment made from those artifacts.
 - A public demo that needs no wallet or sign-up.
 - Test plan and compliance matrix, once securities counsel confirms the rules.
 
