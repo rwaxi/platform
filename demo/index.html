@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RWAXI spike · testnet demo</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --card: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --line: #e4e3df;
+    --ok: #1f7a4d; --ok-bg: #e7f4ec; --no: #a3312c; --no-bg: #f8e9e7; --accent: #2b5cab;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151514; --card: #1e1e1c; --text: #ecebe7; --muted: #a09f99; --line: #33332f;
+      --ok: #6cc797; --ok-bg: #17291f; --no: #ec8a83; --no-bg: #2e1a18; --accent: #8fb0ea;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  p { margin: 0 0 12px; }
+  .muted { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 20px; margin-top: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .stat .label { color: var(--muted); font-size: .85rem; }
+  .stat .value { font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 500; font-size: .85rem; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  code, .mono { font-family: var(--mono); font-size: .85rem; }
+  a { color: var(--accent); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 6px 0 4px; }
+  button { font: inherit; padding: 9px 14px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text); cursor: pointer; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .55; cursor: progress; }
+  .result { margin-top: 14px; padding: 12px 14px; border-radius: 8px; }
+  .result.ok { background: var(--ok-bg); color: var(--ok); }
+  .result.no { background: var(--no-bg); color: var(--no); }
+  .result strong { display: block; margin-bottom: 4px; }
+  details { margin-top: 8px; color: var(--text); }
+  pre { white-space: pre-wrap; word-break: break-all; font-family: var(--mono); font-size: .78rem;
+    background: var(--bg); padding: 10px; border-radius: 6px; margin: 8px 0 0; }
+  .note { font-size: .88rem; color: var(--muted); margin-top: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>RWAXI spike, live on Stellar testnet</h1>
+  <p class="muted">An OpenZeppelin RWA token with a Reg S compliance module of ours. While the distribution compliance period runs, the token refuses to send units to a U.S. resident. Try it below. No wallet or sign-up: every call is a simulation by the network, so nothing is signed or written to the ledger.</p>
+
+  <section class="card" aria-labelledby="state">
+    <h2 id="state">Reg S period</h2>
+    <div class="grid">
+      <div class="stat"><div class="label">Restriction</div><div class="value" id="active">loading…</div></div>
+      <div class="stat"><div class="label">Ends at ledger</div><div class="value" id="end">…</div></div>
+      <div class="stat"><div class="label">Current ledger</div><div class="value" id="ledger">…</div></div>
+      <div class="stat"><div class="label">Ends around</div><div class="value" id="eta">…</div></div>
+    </div>
+    <p class="note">The period length is a placeholder of about one year until securities counsel sets it.</p>
+  </section>
+
+  <section class="card" aria-labelledby="investors">
+    <h2 id="investors">Verified investors</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Investor</th><th>Residence</th><th>Wallet</th><th class="num">ABF1 balance</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note">All three hold a signed KYC claim. Only the residence differs.</p>
+  </section>
+
+  <section class="card" aria-labelledby="try">
+    <h2 id="try">Simulate a transfer of 10 ABF1 from Alice</h2>
+    <div class="actions">
+      <button id="to-bob" disabled>Alice → Bob (Colombia)</button>
+      <button id="to-carol" disabled>Alice → Carol (United States)</button>
+    </div>
+    <div id="result" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-labelledby="verify">
+    <h2 id="verify">Check it yourself</h2>
+    <div class="table-wrap"><table><tbody id="links"></tbody></table></div>
+    <p class="note">Deployed from the attested release recorded in <a href="../deployments/testnet.json">deployments/testnet.json</a>. Source: <a href="https://github.com/rwaxi/platform">github.com/rwaxi/platform</a> · <a href="https://github.com/rwaxi/platform/blob/main/docs/test-plan.md">test plan</a> · <a href="https://github.com/rwaxi/platform/blob/main/docs/6-decisions/ADR-007-spike-compliance-rule-reg-s.md">ADR-007</a>.</p>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk@17.1.0/dist/stellar-sdk.min.js"
+        integrity="sha384-So+5dgGg/Zp3Ey8Ljk5yxwPDxhDVnxJBjTAPL/LSSHeKm0Zwwbktq2zflkIQt1rN"
+        crossorigin="anonymous"></script>
+<script src="demo.js"></script>
+<script>
+(async function () {
+  const D = window.RwaxiDemo;
+  const $ = (id) => document.getElementById(id);
+  const expert = (kind, id) => `https://stellar.expert/explorer/testnet/${kind}/${id}`;
+  const short = (a) => `${a.slice(0, 6)}…${a.slice(-6)}`;
+  const fmt = (v) => v === null ? "n/a" : (Number(v) / 1e7).toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+  let d;
+  try {
+    d = await (await fetch("../deployments/testnet.json", { cache: "no-store" })).json();
+  } catch (e) {
+    $("active").textContent = "could not load deployments/testnet.json";
+    return;
+  }
+
+  const people = [
+    ["Alice", "Colombia", d.accounts.alice_colombia],
+    ["Bob", "Colombia", d.accounts.bob_colombia],
+    ["Carol", "United States", d.accounts.carol_usa],
+  ];
+
+  function renderLinks() {
+    const rows = [
+      ["RWA token (ABF1)", expert("contract", d.contracts.rwa_token)],
+      ["Reg S compliance module", expert("contract", d.contracts.reg_s_distribution_period)],
+      ["Compliance dispatcher", expert("contract", d.contracts.compliance)],
+      ["Identity registry", expert("contract", d.contracts.identity_registry)],
+    ];
+    $("links").innerHTML = rows.map(([label, url]) =>
+      `<tr><td>${label}</td><td><a class="mono" href="${url}">${short(url.split("/").pop())}</a></td></tr>`).join("");
+  }
+
+  async function refresh() {
+    try {
+      const [ledger, period] = await Promise.all([D.latestLedger(), D.periodStatus(d)]);
+      $("ledger").textContent = ledger.toLocaleString("en-US");
+      $("end").textContent = period.end ? period.end.toLocaleString("en-US") : "n/a";
+      $("active").textContent = period.active ? "Active" : "Lifted";
+      if (period.end && period.end > ledger) {
+        const eta = new Date(Date.now() + (period.end - ledger) * 5000);
+        $("eta").textContent = eta.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+      } else {
+        $("eta").textContent = "already ended";
+      }
+      const balances = await Promise.all(people.map(([, , a]) => D.balance(d, a)));
+      $("rows").innerHTML = people.map(([name, country, a], i) =>
+        `<tr><td>${name}</td><td>${country}</td><td><a class="mono" href="${expert("account", a)}">${short(a)}</a></td><td class="num">${fmt(balances[i])}</td></tr>`).join("");
+      $("to-bob").disabled = false;
+      $("to-carol").disabled = false;
+    } catch (e) {
+      $("active").textContent = "testnet unreachable";
+      console.error(e);
+    }
+  }
+
+  async function run(to, name) {
+    const buttons = [$("to-bob"), $("to-carol")];
+    buttons.forEach((b) => (b.disabled = true));
+    $("result").innerHTML = `<div class="result">Asking the network to simulate Alice → ${name}…</div>`;
+    try {
+      const r = await D.simulateTransfer(d, to, 10);
+      if (r.ok) {
+        $("result").innerHTML = `<div class="result ok"><strong>Allowed</strong>Both wallets passed identity verification and every compliance module answered yes. Signed and sent, this transfer would go through.</div>`;
+      } else {
+        const why = D.ERRORS[r.code] || "the token rejected the transfer";
+        const log = (r.error || "").split("\n").filter((l) => /can_transfer|#\d{3}/.test(l)).slice(0, 6).join("\n");
+        $("result").innerHTML = `<div class="result no"><strong>Rejected with error #${r.code ?? "?"}</strong>${why}. The module checked Carol's residence in the identity registry and returned <code>can_transfer → false</code>.<details><summary>Diagnostic events from the network</summary><pre></pre></details></div>`;
+        $("result").querySelector("pre").textContent = log;
+      }
+    } catch (e) {
+      $("result").innerHTML = `<div class="result no"><strong>Could not reach testnet</strong>Try again in a moment.</div>`;
+      console.error(e);
+    } finally {
+      buttons.forEach((b) => (b.disabled = false));
+    }
+  }
+
+  $("to-bob").addEventListener("click", () => run(d.accounts.bob_colombia, "Bob"));
+  $("to-carol").addEventListener("click", () => run(d.accounts.carol_usa, "Carol"));
+  renderLinks();
+  refresh();
+})();
+</script>
+</body>
+</html>

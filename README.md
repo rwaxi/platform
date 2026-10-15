@@ -27,6 +27,7 @@ How the rule works: `reg-s-distribution-period` is a compliance module registere
 | Reg S module | [CDDOEBLE…MMX6BVOULQ](https://stellar.expert/explorer/testnet/contract/CDDOEBLE5NA65DIQIMRCJTHYDESMK5STN4WT3XLDAXQ3ENMMX6BVOULQ) |
 | ✅ Transfer allowed (Colombia → Colombia) | [transaction ed49b5e9…ceba3fe](https://stellar.expert/explorer/testnet/tx/ed49b5e9d4d65f8d787c935e847fe967bf7c6a576b2231420cffe8d12ceba3fe) |
 | ❌ Transfer blocked (Colombia → U.S. resident) | Rejected when the network simulates the transaction, so nothing is written to the ledger and there is no hash. The demo script prints the contract error `#305` and the module's `can_transfer → false`. |
+| Try both in the browser, no wallet or sign-up | [rwaxi.github.io/platform/demo](https://rwaxi.github.io/platform/demo/) (simulations through the public testnet RPC; nothing is signed) |
 | Reproduce both with one command | `./scripts/demo-blocked-transfer.sh` |
 
 The blocked case is also covered by [integration tests](tests/integration/src/spike.rs) that assert error 305 on transfer and 306 on mint, the exact boundary ledger, and that forced transfers are exempt.
@@ -89,7 +90,6 @@ The identity and token contracts are adapted from OpenZeppelin's examples (MIT, 
 
 ## What comes next
 
-- A public demo that needs no wallet or sign-up.
 - Test plan and compliance matrix, once securities counsel confirms the rules.
 
 Built on [OpenZeppelin `stellar-contracts`](https://github.com/OpenZeppelin/stellar-contracts) (RWA module, smart accounts), Soroban, native USDC and OpenZeppelin Relayer.

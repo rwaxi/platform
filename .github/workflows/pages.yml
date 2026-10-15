@@ -1,0 +1,39 @@
+# Publishes the read-only testnet demo (demo/) with the deployment record it
+# reads (deployments/testnet.json) to GitHub Pages.
+# Needs Settings > Pages > Source: GitHub Actions.
+name: Demo on Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["demo/**", "deployments/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}demo/
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble the site
+        run: |
+          mkdir -p site
+          cp -r demo deployments site/
+          printf '<meta http-equiv="refresh" content="0; url=demo/">\n' > site/index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
