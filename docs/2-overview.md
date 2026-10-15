@@ -78,8 +78,8 @@ Versions must be pinned in `Cargo.toml` / `package.json`; this table is copied i
 
 | Dependency | Version (as of 2026-09-24) | Use |
 |---|---|---|
-| `soroban-sdk` | 27.0.2 (the version OZ 0.7.1 builds against) | all contracts |
-| OpenZeppelin `stellar-contracts` (`stellar-tokens`, `stellar-access`, `stellar-accounts`, `stellar-contract-utils`) | 0.7.1 — re-evaluate 0.8.0 when it leaves RC | RWA token, identity, compliance, RBAC, smart accounts |
+| `soroban-sdk` | 26.1.1 (the version OZ 0.7.2 builds against; built with `stellar contract build`, stellar-cli 25.2+) | all contracts |
+| OpenZeppelin `stellar-contracts` (`stellar-tokens`, `stellar-access`, `stellar-accounts`, `stellar-contract-utils`) | 0.7.2 — re-evaluate 0.8.0 when it leaves RC | RWA token, identity, compliance, RBAC, smart accounts |
 | Stellar CLI | pin at spike start | build, deploy, invoke |
 | `@stellar/stellar-sdk` (TS) | pin at T1 start | backend, SDK |
 | `stellar/smart-account-kit` (TS) | pin at T1 start | passkey smart accounts ([ADR-002](6-decisions/ADR-002-smart-accounts-passkeys.md)) |

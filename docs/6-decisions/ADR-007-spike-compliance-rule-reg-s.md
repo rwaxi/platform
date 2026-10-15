@@ -13,6 +13,8 @@ The rule chosen must be:
 
 Offering context: the fund sells to non-US investors (Colombia) under Regulation S. During the **distribution compliance period** (Rule 903), securities sold offshore may not be offered or sold to a U.S. person. After the period ends, the restriction lifts. For equity of a non-reporting U.S. issuer (Category 3) the period is generally one year; the exact length and definitions are counsel's call.
 
+**Scope assumption (2026-10-06):** Fund I is sold only under Regulation S. There is no Regulation D tranche in the same token, so this rule does not block any investor the fund can legally sell to. If a Reg D offering is added later on the same token, this ADR must be reopened, because the rule would also block U.S. accredited investors.
+
 ## Options
 
 | # | Option | Real | Verifiable | Beyond OZ | Small |
@@ -26,7 +28,7 @@ Offering context: the fund sells to non-US investors (Colombia) under Regulation
 Option 1 depends on an operator remembering to act on a date; the rule's time bound is not enforced by the chain. Option 5 would be building award deliverables before the award, which SCF does not reimburse.
 
 ## Decision
-Option 4: a custom compliance module implementing OpenZeppelin's `ComplianceModule` trait, registered in the OZ compliance dispatcher for the `Transferred` and `Created` hooks.
+Option 4: a custom compliance module implementing OpenZeppelin's `ComplianceModule` trait, registered in the OZ compliance dispatcher for the **`CanTransfer` and `CanCreate`** hooks. OZ's `on_transfer`/`on_created` are post-action notifications; the blocking hooks are the read-only `can_transfer`/`can_create`, which return `bool`.
 
 ### Rule
 For a given token, while `current_ledger < period_end_ledger`, reject any **Standard** or **Delegated** transfer, and any mint, whose recipient wallet has a **U.S. country relation** in the identity registry storage. `Forced` and `Recovery` transfers are exempt (privileged operations, per OZ guidance). After `period_end_ledger`, the module allows everything.
@@ -35,14 +37,16 @@ For a given token, while `current_ledger < period_end_ledger`, reject any **Stan
 
 ```rust
 pub trait RegSDistributionPeriod: ComplianceModule {
-    fn set_identity_registry_storage(e: &Env, token: Address, irs: Address, operator: Address);
-    fn set_period_end(e: &Env, token: Address, period_end_ledger: u32, operator: Address);
-    fn set_restricted_relations(e: &Env, token: Address, relations: Vec<RelationKind>, operator: Address); // default: Residence(840)
+    // all three require auth from the module owner (set in the constructor)
+    fn set_identity_registry_storage(e: &Env, token: Address, irs: Address);
+    fn set_period_end(e: &Env, token: Address, period_end_ledger: u32);
+    fn set_restricted_relations(e: &Env, token: Address, relations: Vec<RelationKind>); // default: [Residence]
     fn period_end(e: &Env, token: Address) -> u32;
     fn is_active(e: &Env, token: Address) -> bool;
 }
-// on_transfer / on_created: read recipient CountryData from IRS;
-// if active and any restricted relation == 840 → panic_with_error!(RegSRecipientUSPerson)
+// can_transfer / can_create: read recipient CountryData from IRS;
+// return false if active and any restricted relation == 840.
+// A recipient with no country data is also refused while the period is active (fail closed).
 ```
 
 - Time is measured in **ledger sequence**, like OZ's lockup module, not timestamps.
