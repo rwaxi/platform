@@ -13,6 +13,9 @@
 
 * [4 · Critical flows](4-flows.md)
 * [5 · Data flows and trust boundaries](5-security.md)
+* [Threat model (STRIDE)](threat-model.md)
+* [Deployment guide](deploy.md)
+* [On-chain monitoring](monitoring.md)
 
 ## 6 · Decisions
 

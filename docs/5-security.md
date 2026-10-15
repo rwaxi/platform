@@ -1,7 +1,7 @@
 # 5 · Security: data flows and trust boundaries
 
 > Status: **Draft v0.1** · 2026-09-24
-> Purpose: answer *"What are we working on?"* in the Stellar threat-modeling process ([How-To Guide](https://developers.stellar.org/docs/build/security-docs/threat-modeling/threat-modeling-how-to)). This is the input to the STRIDE threat model (`threat-model.md`) and to the Tranche 2 monitoring plan (`monitoring.md`), and it covers the "Dataflow Diagram" item of the Audit Bank readiness checklist.
+> Purpose: answer *"What are we working on?"* in the Stellar threat-modeling process ([How-To Guide](https://developers.stellar.org/docs/build/security-docs/threat-modeling/threat-modeling-how-to)). This is the input to the STRIDE [threat model](threat-model.md) and to the [monitoring plan](monitoring.md), and it covers the "Dataflow Diagram" item of the Audit Bank readiness checklist.
 
 Notation, as defined by the How-To Guide:
 
@@ -67,7 +67,7 @@ The spike has no app, backend or third parties. A developer operates it with the
 | D11 | Relayer → Stellar | Submission with fee bump | TB6 → TB5 | Signatures inside the transaction cannot be altered |
 | D12 | Smart account → contracts | `transfer`, `subscribe`, `claim` | inside TB5 | `require_auth` via passkey signature |
 | D13 | Token → Identity verifier | `verify_identity(from)`, `verify_identity(to)` | inside TB5 | Reverts if a required claim is missing, expired or revoked |
-| D14 | Token → Compliance | Hooks with pre-operation `AccountSnapshot` | inside TB5 | Runs in the same transaction; a panic reverts everything |
+| D14 | Token → Compliance | `can_transfer` / `can_create` before the balances move; `transferred` / `created` / `destroyed` after | inside TB5 | Runs in the same transaction; one `false` makes the token revert with 305 or 306 |
 | D15 | Reg S module → Identity registry | Country relations of the recipient | inside TB5 | Read-only |
 | D16 | Subscription → Token | Mint at offering close | inside TB5 | Contract holds the agent role for minting only |
 | D17 | Stellar → Indexer | Contract events | TB5 → TB3 | Public data; the indexer is **not authoritative**, the ledger is |
@@ -109,4 +109,4 @@ The spike has no app, backend or third parties. A developer operates it with the
 
 ---
 
-← [4 · Flows](4-flows.md) · [Index](README.md) · [6 · Decisions](6-decisions/README.md) →
+← [4 · Flows](4-flows.md) · [Index](README.md) · [Threat model](threat-model.md) →

@@ -10,6 +10,7 @@ Read it in order. The numbers match the folders and files.
 | 3 | [C4 model](3-c4/1-context.md): [context](3-c4/1-context.md), [containers](3-c4/2-containers.md), [components](3-c4/3-components.md) | The system from the outside in |
 | 4 | [Critical flows](4-flows.md) | The five flows, starting with the one the spike proves |
 | 5 | [Security](5-security.md) | Data flows, data stores and trust boundaries |
+| — | [Threat model](threat-model.md), [deployment](deploy.md), [monitoring](monitoring.md) | STRIDE with responses, how we deploy and verify, which events we watch |
 | 6 | [Decisions](6-decisions/README.md) | ADR-001 to ADR-007 |
 | 7 | [Model and diagrams](7-model/README.md) | The Archi model, the twelve images and the PDFs |
 | — | [Test plan](test-plan.md) | What the spike tests, how to re-run it, and what is missing |
