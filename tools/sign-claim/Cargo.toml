@@ -1,0 +1,13 @@
+[package]
+name = "sign-claim"
+description = "Signs KYC claims for the testnet deployment with the same message the claim issuer contract verifies"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+stellar-tokens = { workspace = true }
+ed25519-dalek = { workspace = true }
