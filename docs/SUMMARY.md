@@ -28,6 +28,7 @@
 ## Quality
 
 * [Test plan](test-plan.md)
+* [Compliance matrix](compliance-matrix.md)
 
 ## 7 · Model
 

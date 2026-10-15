@@ -101,4 +101,4 @@ These are parameters, not code. Tests already cover both settings of each; what 
 
 ---
 
-← [6 · Decisions](6-decisions/README.md) · [Index](README.md) · [7 · Model and diagrams](7-model/README.md) →
+← [6 · Decisions](6-decisions/README.md) · [Index](README.md) · [Compliance matrix](compliance-matrix.md) →

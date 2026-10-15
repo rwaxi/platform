@@ -13,5 +13,6 @@ Read it in order. The numbers match the folders and files.
 | 6 | [Decisions](6-decisions/README.md) | ADR-001 to ADR-007 |
 | 7 | [Model and diagrams](7-model/README.md) | The Archi model, the twelve images and the PDFs |
 | — | [Test plan](test-plan.md) | What the spike tests, how to re-run it, and what is missing |
+| — | [Compliance matrix](compliance-matrix.md) | Each legal rule mapped to the contract, parameter and test that enforce it |
 
 Step 1 is the repository [README](../README.md) and step 8 the open source files at the root (license, security policy, contributing guide).

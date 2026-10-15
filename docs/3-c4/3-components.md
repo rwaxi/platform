@@ -37,7 +37,7 @@ Thin wrapper over OZ `stellar-tokens::rwa`. No custom token logic ([ADR-001](../
 | `pause` / `unpause` | admin | Emergency stop |
 | `set_compliance`, `set_identity_verifier` | admin | Wiring; emits events monitored in T2 |
 
-Compliance model (from OZ): hooks run **after** state changes within the same transaction; a module rejects by panicking, which reverts everything. Each hook receives `AccountSnapshot { balance, frozen }` from before the operation, so modules never call back into the token.
+Compliance model (from OZ 0.7.2): before moving balances, the token asks the dispatcher `can_transfer` / `can_create`; each module registered on `CanTransfer` / `CanCreate` answers `true` or `false` without changing state, and one `false` makes the token revert with `TransferNotCompliant` (305) or `MintNotCompliant` (306). After the balances move, the dispatcher calls `transferred` / `created` / `destroyed` so stateful modules update their counters in the same transaction. Hooks receive `from`, `to`, `amount` and the token address.
 
 ### 2.2 Identity stack — OZ `identity_verification` (shared)
 
@@ -53,17 +53,17 @@ One investor may hold several wallets (e.g., after recovery); identity is per in
 
 ### 2.3 Compliance dispatcher — OZ `Compliance` (per vehicle)
 
-Registers modules per hook (`Transferred`, `Created`, `Destroyed`) and fans calls out. Only `module_operator` can add/remove modules. Every change emits an event that the monitoring plan alerts on.
+Registers modules per hook (`CanTransfer`, `CanCreate`, `Transferred`, `Created`, `Destroyed`) and fans calls out. Only `module_operator` can add/remove modules. Every change emits an event that the monitoring plan alerts on.
 
 ### 2.4 Compliance modules
 
 | Module | Source | Hook(s) | Rule | Vehicle I config (pending counsel, 2026-10-09) |
 |---|---|---|---|---|
-| `reg-s-distribution-period` | **custom** ([ADR-007](../6-decisions/ADR-007-spike-compliance-rule-reg-s.md)) | Transferred, Created | Until `period_end_ledger`, no tokens may reach a wallet whose identity has a US country relation | Period length set by counsel |
-| `country_restrict` | OZ | Transferred, Created | Blocks recipients from listed countries | OFAC-sanctioned jurisdictions |
-| `initial_lockup_period` | OZ | Created, Transferred, Destroyed | Minted tokens locked N ledgers; only unlocked balance is movable | Holding period set by counsel |
-| `max_balance` | OZ | Transferred, Created | Max holding per identity | Per offering memorandum |
-| `supply_limit` | OZ | Created | Cap on total issuance | Fund size |
+| `reg-s-distribution-period` | **custom** ([ADR-007](../6-decisions/ADR-007-spike-compliance-rule-reg-s.md)) | CanTransfer, CanCreate | Until `period_end_ledger`, no tokens may reach a wallet whose identity has a US country relation | Period length set by counsel |
+| `country_restrict` | OZ | CanTransfer, CanCreate | Blocks recipients from listed countries | OFAC-sanctioned jurisdictions |
+| `initial_lockup_period` | OZ | CanTransfer; state on Created, Transferred, Destroyed | Minted tokens locked N ledgers; only unlocked balance is movable | Holding period set by counsel |
+| `max_balance` | OZ | CanTransfer, CanCreate; state on Created, Transferred, Destroyed | Max holding per identity | Per offering memorandum |
+| `supply_limit` | OZ | CanCreate; state on Created, Destroyed | Cap on total issuance | Fund size |
 | `balance-checkpoint` | **custom** (T2) | all | Bookkeeping only: records per-holder balance at each distribution epoch | Used by `distribution` |
 
 Rule source of truth: `docs/compliance-matrix.md` maps **legal rule → module → parameter → test**. No rule is implemented without a line in that matrix.
