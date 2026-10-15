@@ -54,6 +54,7 @@ struct Fixture<'a> {
     owner: Address,
     token: Address,
     irs: Address,
+    compliance: Address,
     module: RegSDistributionPeriodClient<'a>,
 }
 
@@ -74,6 +75,7 @@ impl<'a> Fixture<'a> {
             owner,
             token,
             irs,
+            compliance,
             module,
         }
     }
@@ -231,4 +233,30 @@ fn compliance_address_is_one_time() {
     let f = Fixture::new();
     let other = Address::generate(&f.e);
     assert!(f.module.try_set_compliance_address(&other).is_err());
+}
+
+#[test]
+fn views_report_the_configuration() {
+    let f = Fixture::new();
+    assert_eq!(f.module.period_end(&f.token), END);
+    assert_eq!(f.module.restricted_country(), US);
+    assert_eq!(
+        f.module.restricted_relations(&f.token),
+        vec![&f.e, RelationKind::Residence]
+    );
+    assert_eq!(
+        f.module.name(),
+        soroban_sdk::String::from_str(&f.e, "RegSDistributionPeriodModule")
+    );
+    assert_eq!(f.module.get_compliance_address(), f.compliance);
+}
+
+#[test]
+fn notification_hooks_do_nothing() {
+    let f = Fixture::new();
+    let a = Address::generate(&f.e);
+    let b = Address::generate(&f.e);
+    f.module.on_transfer(&a, &b, &1, &f.token);
+    f.module.on_created(&a, &1, &f.token);
+    f.module.on_destroyed(&a, &1, &f.token);
 }
