@@ -1,0 +1,8 @@
+RWAXI Platform
+Copyright 2026 RWAXI Corp.
+
+This product includes software adapted from OpenZeppelin Stellar Contracts
+(https://github.com/OpenZeppelin/stellar-contracts), v0.7.2, MIT License,
+Copyright (c) 2024 OpenZeppelin. Adapted files carry a header naming their origin:
+contracts/rwa-token, compliance, identity-registry, identity-verifier,
+claim-topics-and-issuers, claim-issuer and investor-identity.

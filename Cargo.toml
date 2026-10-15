@@ -1,0 +1,32 @@
+[workspace]
+resolver = "2"
+members = ["contracts/*", "tests/integration", "tools/sign-claim"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/rwaxi/platform"
+publish = false
+
+[workspace.dependencies]
+soroban-sdk = "=26.1.1"
+stellar-tokens = "=0.7.2"
+stellar-access = "=0.7.2"
+stellar-contract-utils = "=0.7.2"
+stellar-macros = "=0.7.2"
+ed25519-dalek = "2.1.1"
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
+
+[profile.release-with-logs]
+inherits = "release"
+debug-assertions = true

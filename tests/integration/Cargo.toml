@@ -1,0 +1,24 @@
+[package]
+name = "integration-tests"
+description = "End-to-end tests of the spike: token, identity stack and the Reg S compliance module together"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lib]
+doctest = false
+
+[dependencies]
+soroban-sdk = { workspace = true, features = ["testutils"] }
+stellar-tokens = { workspace = true }
+ed25519-dalek = { workspace = true }
+rwa-token = { path = "../../contracts/rwa-token" }
+compliance = { path = "../../contracts/compliance" }
+identity-registry = { path = "../../contracts/identity-registry" }
+identity-verifier = { path = "../../contracts/identity-verifier" }
+claim-topics-and-issuers = { path = "../../contracts/claim-topics-and-issuers" }
+claim-issuer = { path = "../../contracts/claim-issuer" }
+investor-identity = { path = "../../contracts/investor-identity" }
+reg-s-distribution-period = { path = "../../contracts/reg-s-distribution-period" }
