@@ -32,6 +32,8 @@
 
 * [Test plan](test-plan.md)
 * [Compliance matrix](compliance-matrix.md)
+* [On-chain metrics](metrics.md)
+* [Roadmap and verification by tranche](roadmap.md)
 
 ## 7 · Model
 

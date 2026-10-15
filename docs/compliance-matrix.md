@@ -57,4 +57,4 @@ For each of R-03 to R-11: the rule in one sentence, its legal source, and the va
 
 ---
 
-← [Test plan](test-plan.md) · [Index](README.md) · [7 · Model and diagrams](7-model/README.md) →
+← [Test plan](test-plan.md) · [Index](README.md) · [On-chain metrics](metrics.md) →

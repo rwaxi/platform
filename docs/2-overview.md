@@ -58,7 +58,7 @@ How to export them is in [7 · Model and diagrams](7-model/README.md).
 | Identity stack (registry, claim topics & issuers, claim issuer, verifier) | minimal, 1 topic | KYC + accreditation + country topics, expiry, revocation | — | deployed |
 | Compliance dispatcher | yes | — | — | deployed |
 | Module `reg-s-distribution-period` (custom) | **yes** | hardening + edge cases | — | deployed |
-| OZ modules: `country_restrict`, `initial_lockup_period`, `max_balance`, `supply_limit` | — | configured per vehicle | — | deployed |
+| OZ modules: `country_restrict`, `initial_lockup_period`, `max_balance`, `supply_limit` | — | configured per vehicle (OZ 0.8.0, or adapted into `contracts/` if 0.8.0 is not stable by January) | — | deployed |
 | `subscription` (custom) | — | — | USDC in → mint at close / refund | deployed |
 | `distribution` (custom) | — | — | USDC deposit → pro-rata pull claim | deployed |
 | `vehicle-factory` (custom) | — | — | one set of contracts per fund | deployed |
