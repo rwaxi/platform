@@ -25,6 +25,10 @@
 * [ADR-006 · One token per vehicle](6-decisions/ADR-006-one-token-per-vehicle.md)
 * [ADR-007 · Reg S compliance rule](6-decisions/ADR-007-spike-compliance-rule-reg-s.md)
 
+## Quality
+
+* [Test plan](test-plan.md)
+
 ## 7 · Model
 
 * [7 · Model and diagrams](7-model/README.md)

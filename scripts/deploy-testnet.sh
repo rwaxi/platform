@@ -6,11 +6,16 @@
 # (create them with:  for n in admin manager alice bob carol; do stellar keys generate rwaxi-$n --network testnet --fund; done)
 #
 # Alice and Bob are Colombian residents, Carol is a U.S. resident. All three hold a signed KYC claim.
+#
+# By default it builds locally. To deploy the attested release instead:
+#   RELEASE=v0.1.0 ./scripts/deploy-testnet.sh
+# downloads each contract's WASM from the GitHub release (SEP-55 verified build) and deploys those.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 NET=testnet
 WASM=target/wasm32v1-none/release
+RELEASE=${RELEASE:-}
 KYC=1
 PERIOD_LEDGERS=${PERIOD_LEDGERS:-$((17280 * 365))}   # placeholder: ~1 year; counsel sets the real length (ADR-007)
 CLAIM_KEY=.secrets/claim-signer.key
@@ -28,8 +33,14 @@ call() { # <source> <contract id> -- fn args...
   stellar contract invoke --network $NET --source "rwaxi-$source" --id "$id" "$@"
 }
 
-echo "== Build"
-stellar contract build >/dev/null
+if [ -n "$RELEASE" ]; then
+  echo "== Download WASM from release $RELEASE"
+  WASM=$(mktemp -d)
+  "$(dirname "$0")/fetch-release-wasm.sh" "$RELEASE" "$WASM"
+else
+  echo "== Build"
+  stellar contract build >/dev/null
+fi
 [ -f "$CLAIM_KEY" ] || { mkdir -p .secrets; umask 077; openssl rand -hex 32 > "$CLAIM_KEY"; }
 PUBKEY=$(cargo run -q -p sign-claim -- pubkey "$CLAIM_KEY")
 RUN=$(date +%m%d%H%M%S)
@@ -94,6 +105,7 @@ doc = {
   "network": "testnet",
   "deployed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
   "commit": git("rev-parse","HEAD"), "working_tree_clean": git("status","--porcelain")=="",
+  "wasm_source": "github release $RELEASE (SEP-55 attested build)" if "$RELEASE" else "local build",
   "reg_s": {"period_end_ledger": $PERIOD_END, "deployed_at_ledger": $LEDGER, "note": "placeholder length; counsel defines the Rule 903 period"},
   "contracts": {"rwa_token":"$TOKEN","compliance":"$COMPLIANCE","reg_s_distribution_period":"$MODULE",
     "identity_registry":"$REGISTRY","identity_verifier":"$VERIFIER","claim_topics_and_issuers":"$CTI","claim_issuer":"$ISSUER",

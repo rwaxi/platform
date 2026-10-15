@@ -31,7 +31,6 @@ jobs:
     with:
       release_name: ${{ github.ref_name }}-${{ matrix.package }}
       release_description: "RWAXI platform: ${{ matrix.package }}"
-      relative_path: "."
       package: ${{ matrix.package }}
     secrets:
       release_token: ${{ secrets.GITHUB_TOKEN }}
