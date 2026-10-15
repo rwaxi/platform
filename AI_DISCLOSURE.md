@@ -1,13 +1,13 @@
 # AI Disclosure
 
-This file lists every use of AI-generated or AI-assisted artifacts in this repository, how each was reviewed, and by whom. It is updated with every pull request where AI tools were used.
+We use an AI coding assistant (Claude Code, by Anthropic) the way we use any other tool: it drafts, we decide. This file lists every artifact it helped produce, what it did, and who reviewed it. It is updated with every pull request where AI was used.
 
-## Policy
+## How we work
 
-- AI tools may assist with drafting documentation, diagrams, tests and code.
-- Every AI-assisted artifact is reviewed by a named team member before merge, who is accountable for its content.
-- Smart-contract code is never merged without human review, passing tests and CI.
-- Each PR description states whether AI was used and for what.
+- The assistant drafts documentation, diagrams, tests and code. A named team member reviews each artifact and answers for its content.
+- No contract code reaches `main` without the technical lead's review, passing tests and CI.
+- Each pull request says whether AI was used and for what.
+- A row without a reviewer means the review is still pending, not that it was skipped.
 
 ## Log
 
