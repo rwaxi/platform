@@ -2,10 +2,11 @@
 
 Real-world-asset security tokens on Stellar. The transfer rules run inside the token contract on every transfer, not in a database the operator can edit.
 
+[![CI](https://github.com/rwaxi/platform/actions/workflows/ci.yml/badge.svg)](https://github.com/rwaxi/platform/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-> **Status (September 2026): architecture published, testnet spike in progress.**
-> First milestone is `v0.1.0-spike`: an OpenZeppelin RWA token on Stellar testnet with our Reg S compliance module, one transfer blocked by the rule and one allowed, both with public transaction hashes.
+> **Status (October 2026): testnet spike deployed.**
+> An OpenZeppelin RWA token on Stellar testnet with our Reg S compliance module. A transfer to a U.S. resident is rejected by the rule and a transfer between Colombian residents goes through. Reproduce both with one command.
 
 This repository is meant to be read in order. Each step takes a couple of minutes.
 
@@ -15,13 +16,20 @@ Every `transfer`, `mint` and `burn` checks the identity of both parties against 
 
 ![Compliance-checked transfer](docs/7-model/diagrams/flow-1-compliance-transfer.png)
 
+How the rule works: `reg-s-distribution-period` is a compliance module registered on the `CanTransfer` and `CanCreate` hooks. While the ledger sequence is below `period_end_ledger`, it answers `false` when the recipient's identity record shows a U.S. residence, and the token reverts with `TransferNotCompliant` (error 305). After that ledger it allows everything. Rule and rationale: [ADR-007](docs/6-decisions/ADR-007-spike-compliance-rule-reg-s.md).
+
+**Verify it in two minutes.** Addresses are in [`deployments/testnet.json`](deployments/testnet.json).
+
 | Verify on Stellar testnet | Link |
 |---|---|
-| RWA token contract | _available with v0.1.0-spike_ |
-| Compliance dispatcher and Reg S module | _available with v0.1.0-spike_ |
-| ❌ Transfer blocked (US person during the Reg S period) | _available with v0.1.0-spike_ |
-| ✅ Transfer allowed | _available with v0.1.0-spike_ |
-| Reproduce both with one command | `./scripts/demo-blocked-transfer.sh` (with v0.1.0-spike) |
+| RWA token contract (`ABF1`) | [CBMQN2JP…D5YXKRY](https://stellar.expert/explorer/testnet/contract/CBMQN2JPENCFMPDXG7GZD3EK7EEJIQQOEY5L573OHCUZJSCG6D5YXKRY) |
+| Compliance dispatcher | [CBCH42NZ…FL5YRVR5U7ZLDCV](https://stellar.expert/explorer/testnet/contract/CBCH42NZWRKGDQLVVJHS27JZ7HDNX3YRQTEEWNCLQFL5YRVR5U7ZLDCV) |
+| Reg S module | [CBFKRPFC…ITOSFVWV5FO4A2](https://stellar.expert/explorer/testnet/contract/CBFKRPFCVRF5COACIIRWMTH4G4PGACXKXAUBBJKUZITTOSFVWV5FO4A2) |
+| ✅ Transfer allowed (Colombia → Colombia) | [transaction 29c1c4cf…b9f8d1](https://stellar.expert/explorer/testnet/tx/29c1c4cf30b10f1a4b271cb1575e1736106ac6196cd99892c7797b7f6ab9f8d1) |
+| ❌ Transfer blocked (Colombia → U.S. resident) | Rejected when the network simulates the transaction, so nothing is written to the ledger and there is no hash. The demo script prints the contract error `#305` and the module's `can_transfer → false`. |
+| Reproduce both with one command | `./scripts/demo-blocked-transfer.sh` |
+
+The blocked case is also covered by [integration tests](tests/integration/src/spike.rs) that assert error 305 on transfer and 306 on mint, the exact boundary ledger, and that forced transfers are exempt.
 
 ## 2 · The central decision → [Architecture overview](docs/2-overview.md)
 
@@ -62,9 +70,27 @@ One Archi model generates the twelve diagrams. Also here: the architecture PDF i
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How we work: branches, reviews, ADRs |
 | [.github/](.github) | Code owners, PR and task templates |
 
+## Build & test
+
+```bash
+cargo test --workspace                          # unit and end-to-end tests
+cargo clippy --workspace --all-targets -- -D warnings
+stellar contract build                          # WASM; plain `cargo build` is not enough (OpenZeppelin uses spec shaking v2)
+./scripts/deploy-testnet.sh                     # full deployment from scratch, writes deployments/testnet.json
+```
+
+Needs Rust 1.98.1 (pinned in `rust-toolchain.toml`) and `stellar-cli` 28.1.0. CI runs the same steps and fails below 80 % line coverage.
+
+## Spike and award
+
+What exists today is the 2026 spike, funded by RWAXI: one token, one rule, the identity stack, and the evidence above. The financed work for 2027 (modular compliance per vehicle, subscriptions, distributions, smart accounts, backoffice, audit package) is described in the [architecture overview](docs/2-overview.md) and is not in this repository yet.
+
+The identity and token contracts are adapted from OpenZeppelin's examples (MIT, see [NOTICE](NOTICE)). The Reg S module, the registry getters it depends on, the tests and the deployment tooling are ours.
+
 ## What comes next
 
-- From 5 October: `contracts/`, `tests/`, `scripts/` and `deployments/`, with CI and a coverage badge.
-- By 23 October: the two transaction hashes on testnet and the `v0.1.0-spike` release with a verified build (SEP-55).
+- `v0.1.0` release with a verified build (SEP-55) and a testnet deployment made from those artifacts.
+- A public demo that needs no wallet or sign-up.
+- Test plan and compliance matrix, once securities counsel confirms the rules.
 
 Built on [OpenZeppelin `stellar-contracts`](https://github.com/OpenZeppelin/stellar-contracts) (RWA module, smart accounts), Soroban, native USDC and OpenZeppelin Relayer.
