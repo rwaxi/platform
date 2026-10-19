@@ -1,6 +1,6 @@
 # Compliance matrix
 
-> Status: **v0.1 skeleton** · 2026-10-15 · one rule implemented (Reg S distribution period). The other rules for Avista Beach Tokenization Fund I come from securities counsel and **have not been received yet** (due 2026-10-09). We do not invent rules: every empty cell below waits for counsel.
+> Status: **v0.2** · 2026-10-19 · R-01 and R-02 are built. For the other rows we wrote a baseline from the text of the regulation while we wait for securities counsel (rules were due 2026-10-09). A baseline is our reading, not legal advice. A row moves to "done" only after counsel confirms it.
 
 Each row takes one legal requirement to the place where the chain enforces it: the contract or module, the parameter that encodes it, and the test that proves it. A rule is "done" only when all four columns are filled and the test runs in CI.
 
@@ -16,24 +16,28 @@ A rule can live in one of three places. Which one is a design choice per rule, r
 
 Forced and recovery transfers skip the compliance modules (the token does not call `can_transfer` on them) but recovery still verifies the identity of the new wallet.
 
-## 2. Matrix — Avista Beach Tokenization Fund I
+## 2. Matrix · Avista Beach Tokenization Fund I
 
-| # | Requirement (counsel) | Source | Where | Contract / module | Parameter | Test | Status |
+Working assumptions, the same as in ADR-007: the issuer is a U.S. entity that does not report under the Exchange Act, the units are equity, and Fund I is sold only under Regulation S, mainly to investors in Colombia.
+
+| # | Requirement | Source | Where | Contract / module | Parameter | Test | Status |
 |---|---|---|---|---|---|---|---|
-| R-01 | During the distribution compliance period, no offer or sale to a U.S. person | Reg S, Rule 903 (Category 3) | Module | `reg-s-distribution-period` (ours, [ADR-007](6-decisions/ADR-007-spike-compliance-rule-reg-s.md)) | `period_end_ledger`; `restricted_relations` (default: residence) | `test-plan.md` §3, criteria 1–6 | **Built, on testnet.** Period length and relations are placeholders until counsel confirms |
-| R-02 | Every holder has passed KYC with an approved provider | _counsel_ | Identity | claim topic `1` (KYC), trusted `claim-issuer` | topic id, issuer, signing key, claim validity | `a_wallet_without_identity_cannot_receive` | **Built** with one test issuer and key. Provider (task 41) and validity period pending |
-| R-03 | AML / sanctions screening of every holder | _counsel_ | Identity, maybe module | _pending_: second claim topic (AML) and/or `country_restrict` with sanctioned jurisdictions | _pending_ | — | Waiting for counsel |
-| R-04 | Countries where the fund may be sold, and where it may not | _counsel_ | Module | `country_allow` or `country_restrict` (OZ) | ISO 3166-1 numeric codes | — | Waiting for counsel |
-| R-05 | Investor type allowed to hold (e.g. non-U.S. person, professional or retail) | _counsel_ | Identity | claim topic per investor type | topic ids | — | Waiting for counsel |
-| R-06 | Minimum and maximum investment per investor | _counsel_ | Off-chain (minimum) · Module (maximum) | subscription flow (T2) · `max_balance` (OZ) | amounts in token units | — | Waiting for counsel |
-| R-07 | Holding or lock-up period after subscription | _counsel_ | Module | `initial_lockup_period` (OZ) | lock-up length in ledgers | — | Waiting for counsel |
+| R-01 | During the distribution compliance period, no offer or sale to a U.S. person | Reg S, Rules 902(f), 902(k), 903(b)(3) | Module | `reg-s-distribution-period` (ours, [ADR-007](6-decisions/ADR-007-spike-compliance-rule-reg-s.md)) | `period_end_ledger` = one year after the distribution is complete; `restricted_relations` = `[Residence]` | `test-plan.md` §3, criteria 1–6 | **Built, on testnet.** Parameters from the regulation, counsel to confirm |
+| R-02 | Every holder has passed KYC with an approved provider | Issuer policy; needed for R-03 and R-05 | Identity | claim topic `1` (KYC), trusted `claim-issuer` | topic id, issuer, signing key, claim validity | `a_wallet_without_identity_cannot_receive` | **Built** with one test issuer and key. Provider (task 41) and validity period pending |
+| R-03 | No holder on a sanctions list, and no holder in a comprehensively sanctioned jurisdiction | OFAC regulations (31 CFR Ch. V) bind the issuer as a U.S. entity | Identity, plus module for countries | KYC provider screens before the claim is signed; `country_restrict` (OZ) with the sanctioned jurisdictions | list of country codes, kept off chain and loaded on the module | — | Baseline. The country list changes with OFAC, so it is data, not code. Counsel confirms whether Colombian AML rules add anything |
+| R-04 | Countries where Fund I may be offered | Each country's securities law. Reg S does not limit other countries | Module | `country_allow` (OZ) | Colombia (170) to start | — | Baseline. Counsel says how the offer is made in Colombia (private offer or a licensed local promoter) and which other countries are open |
+| R-05 | The buyer certifies it is not a U.S. person and agrees to resell only under Reg S | Rule 903(b)(3)(iii)(B)(1) and (2) | Identity | claim topic "Reg S certification", signed when the subscription documents are signed | topic id | — | Baseline. Reg S does not ask for accreditation; counsel says if Colombia asks for an investor type |
+| R-06 | Minimum and maximum investment per investor | Offering memorandum (business terms, not Reg S) | Off-chain (minimum) · Module (maximum) | subscription flow (T2) · `max_balance` (OZ) | amounts in token units | — | Waiting for the memorandum |
+| R-07 | Holding period after subscription | Covered by R-01 and R-09 under Reg S | Module | `initial_lockup_period` (OZ) only if the memorandum adds a lock-up of its own | lock-up length in ledgers | — | Not needed by the regulation; only if the memorandum asks |
 | R-08 | Maximum size of the offering | Offering memorandum | Module | `supply_limit` (OZ) | cap in token units | — | Waiting for the memorandum |
-| R-09 | Who may receive a secondary transfer after the period (transferability) | _counsel_ | Module | `transfer_allow` (OZ) or a custom module | _pending_ | — | Waiting for counsel |
-| R-10 | Limits on transfer volume per period | _counsel_ | Module | `time_transfers_limits` (OZ) | window and limit | — | Only if counsel requires it |
-| R-11 | Maximum number of holders | _counsel_ | Module | none in OZ; custom module (T1) | holder cap | — | Only if counsel requires it |
-| R-12 | Recovery of a lost wallet | _counsel_ (approve the procedure) | Identity + token | `recover_identity` (registry) then `recover_balance` (token), operator role | — | _planned_ T1 (`test-plan.md` §6) | Procedure needs JP's legal approval |
+| R-09 | After the period, a resale to a U.S. person needs an exemption | Rule 905 (restricted securities); Rule 144(b)(1) and (d)(1)(ii) | Identity + module | claim topic "affiliate"; custom module or `transfer_allow` (OZ) for affiliate transfers | affiliate list | — | Baseline. Holders that are not affiliates: free after one year, the same as R-01. Affiliates (managers, 10 % holders, the sponsor) keep Rule 144 limits. Counsel confirms who is an affiliate |
+| R-10 | Limits on transfer volume per period | Rule 144(e) volume limits, affiliates only | Module | `time_transfers_limits` (OZ) | window and limit | — | Only if R-09 leaves affiliates able to sell into the U.S. |
+| R-11 | Maximum number of holders | Investment Company Act 3(c)(1) if the fund relies on it (100 owners); Colombian private offer if it goes that way | Module | none in OZ; custom module (T1) | holder cap | — | Counsel says which exemption Fund I uses. A fund that owns real estate directly may not be an investment company at all |
+| R-12 | Recovery of a lost wallet | Issuer procedure | Identity + token | `recover_identity` (registry) then `recover_balance` (token), operator role | — | _planned_ T1 (`test-plan.md` §6) | Procedure needs JP's legal approval |
+| R-13 | Legend on the units: transfers only under Reg S | Rule 903(b)(3)(iii)(B)(3) | Off-chain + metadata | subscription documents; token name or metadata URI points to the legend | URI | — | Baseline. Counsel approves the text |
+| R-14 | No directed selling efforts in the U.S. | Rule 903(a)(2), Rule 902(c) | Off-chain | website and campaigns: no U.S. targeting, a Reg S notice, U.S. visitors cannot start a subscription | — | — | Baseline. Applies to marketing, not to contracts |
 
-The rows R-03 to R-11 are the categories RWAXI asked counsel to define (countries, investor type, KYC, amounts, lock-up, transferability). The mechanism in each row is the candidate, not a decision: counsel's answer can move a rule to another place or remove it.
+The mechanism in each row is a candidate. Counsel's answer can move a rule to another place or remove it.
 
 ## 3. The OpenZeppelin modules we expect to use
 
@@ -53,7 +57,14 @@ A module that keeps state must be registered on its state hooks as well as its b
 
 ## 4. What we need from counsel
 
-For each of R-03 to R-11: the rule in one sentence, its legal source, and the value of its parameter. Plus, for R-01: the exact length of the distribution compliance period and which relations (residence, citizenship, tax residency) make someone a U.S. person; and whether a holder with no country data on record must be refused (today: refused).
+We no longer ask for the rules from scratch. We ask counsel to confirm or correct our reading:
+
+1. Fund I is Category 3: U.S. non-reporting issuer, equity. One-year period that starts when the distribution is complete.
+2. A U.S. person is decided by residence only (Rule 902(k)). A holder with no country data is refused during the period.
+3. Measuring the period in ledgers, with the weekly check in `monitoring.md`, is acceptable.
+4. Who is an affiliate (R-09), and whether the fund relies on an exemption with a holder cap (R-11).
+5. How the offer reaches Colombian investors and whether Colombian rules add investor type, AML or holder limits (R-03, R-04, R-05, R-11).
+6. The legend text (R-13).
 
 ---
 

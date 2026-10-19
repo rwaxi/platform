@@ -25,10 +25,11 @@ Severity: **P1** someone may be bypassing a rule or moving units by force, act n
 | `ModuleAdded` | compliance | A rule started running | P2 |
 | `Mint`, `Burn` | token | Supply changed | P3; P2 if outside a subscription close |
 
-Two checks that do not come from a single event:
+Three checks that do not come from a single event:
 
 - **Transfers rejected with 305.** They fail in simulation and never reach the ledger, so the chain shows nothing. T2: the API logs every rejected simulation and the indexer counts them per day; a spike means a broken integration or someone probing the rule.
 - **Claims close to expiry.** Daily job: claims that expire in the next 30 days (threat T-D-5).
+- **Reg S period against the calendar.** The period is set in ledgers and the law counts days ([ADR-007](6-decisions/ADR-007-spike-compliance-rule-reg-s.md)). Weekly job: estimate the date of `period_end_ledger` from the average close time of the last 7 days. P1 if it falls before the legal end date; the owner moves it forward with `set_period_end`.
 
 ## 2. How alerts reach people
 
