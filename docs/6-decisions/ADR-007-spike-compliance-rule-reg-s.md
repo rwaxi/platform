@@ -1,14 +1,14 @@
 # ADR-007 — Spike compliance rule: Reg S distribution compliance period
 
 - Status: Accepted for the spike · 2026-10-19 · parameters below are our reading of Regulation S; securities counsel has not confirmed them yet
-- History: Proposed 2026-09-24
+- History: Proposed 2026-09-24 · 2026-10-19 investors named as in the deployment (Alice and Bob in Colombia, Carol in the U.S.); the first version had B and C swapped
 
 ## Context
 Before the SCF #46 submission (2026-11-04), the team must show verifiable evidence on Stellar testnet that it can build the core of the product: **a transfer rejected by an on-chain compliance rule, with a public transaction hash, plus an allowed transfer**. The spike is funded by RWAXI in 2026 and is not part of the award scope, so it must stay minimal: one token, one rule.
 
 The rule chosen must be:
 1. **Real** — taken from the actual offering structure of Avista Beach Tokenization Fund I, not a toy rule.
-2. **Specific and verifiable** — a reviewer can understand why transfer A→B fails and A→C succeeds by looking at two hashes.
+2. **Specific and verifiable** — a reviewer can understand why transfer Alice→Carol fails and Alice→Bob succeeds by looking at the error of one and the hash of the other.
 3. **Not already shipped by OpenZeppelin** — so the spike proves the team can extend the framework, not just configure it.
 4. **Small** — buildable in ~10 developer days together with token and identity setup.
 
@@ -80,12 +80,12 @@ The module does what Rule 903(b)(3)(iii)(B)(4) asks of the issuer: refuse to reg
 | 1 | Public GitHub repo under the RWAXI organization, Apache-2.0 | URL |
 | 2 | Unit tests: US recipient blocked during period; non-US allowed; US allowed after period; exact boundary ledger; forced/recovery exempt; unauthorized config rejected | CI green, coverage in the job summary |
 | 3 | Contract IDs on testnet (token, dispatcher, module, identity stack), built from an attested release | `deployments/testnet.json` + Stellar Expert (`verified`) |
-| 4 | A (CO) → B (US) transfer refused with `TransferNotCompliant` (error 305) | `scripts/demo-blocked-transfer.sh` and the public demo. The refusal happens in simulation, so there is no hash (see the last point below) |
-| 5 | Hash of A (CO) → C (CO) transfer succeeding | Stellar Expert, no login |
+| 4 | Alice (CO) → Carol (US) transfer refused with `TransferNotCompliant` (error 305) | `scripts/demo-blocked-transfer.sh` and the public demo. The refusal happens in simulation, so there is no hash (see the last point below) |
+| 5 | Hash of Alice (CO) → Bob (CO) transfer succeeding | Stellar Expert, no login |
 | 6 | `scripts/demo-blocked-transfer.sh` reproduces both from a clean testnet | README |
 
 ## Consequences
 - The spike directly demonstrates the Open Track asks: a Stellar-specific on-chain integration, creative use of the network's newest contract framework, and a team able to extend it.
 - The module becomes a production component in T1 (hardening, edge cases, audit scope), so no spike work is thrown away, and the award budget covers only new work on it.
 - **Legal caveat:** the spike demonstrates the mechanism. The parameters come from our reading of Rules 902 to 905, listed above with their source. Counsel confirms or corrects them; until then they are working values, and the README says so.
-- **Failed transaction hash (resolved 2026-10-15):** the RPC simulation rejects the A→B call with error 305, so nothing reaches the ledger. We chose not to force the submission of a transaction we know fails just to get a hash. The evidence is the reproducible error from the script and the demo, plus the integration tests that assert 305 on transfer and 306 on mint.
+- **Failed transaction hash (resolved 2026-10-15):** the RPC simulation rejects the Alice→Carol call with error 305, so nothing reaches the ledger. We chose not to force the submission of a transaction we know fails just to get a hash. The evidence is the reproducible error from the script and the demo, plus the integration tests that assert 305 on transfer and 306 on mint.
