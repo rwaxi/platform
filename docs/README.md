@@ -15,6 +15,7 @@ Read it in order. The numbers match the folders and files.
 | 7 | [Model and diagrams](7-model/README.md) | The Archi model, the twelve images and the PDFs |
 | — | [Test plan](test-plan.md) | What the spike tests, how to re-run it, and what is missing |
 | — | [Compliance matrix](compliance-matrix.md) | Each legal rule mapped to the contract, parameter and test that enforce it |
+| — | [Error codes](errors.md) | Every error code the contracts return, when it happens and what to do |
 | — | [Metrics](metrics.md), [roadmap](roadmap.md) | What we measure on-chain, and what each tranche delivers and how a reviewer checks it |
 
 Step 1 is the repository [README](../README.md) and step 8 the open source files at the root (license, security policy, contributing guide).
