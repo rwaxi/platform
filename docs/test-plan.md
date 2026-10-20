@@ -32,7 +32,7 @@ Three verified investors, each with an identity contract holding a signed KYC cl
 | 2 | Non-U.S. recipient allowed | `non_us_recipient_is_allowed_during_period` · `alice_to_bob_…` | unit · e2e |
 | 3 | U.S. recipient allowed after the period | `us_recipient_is_allowed_after_period` · `us_investor_can_receive_after_the_period_ends` | unit · e2e |
 | 4 | Exact boundary ledger | `boundary_ledger_is_exact` (last blocked ledger is `period_end_ledger - 1`; `period_end_ledger` itself is free) · the e2e test checks both ledgers on the token | unit · e2e |
-| 5 | Forced and recovery transfers exempt | `forced_transfer_is_exempt_from_the_period` | e2e |
+| 5 | Forced and recovery transfers exempt | `forced_transfer_is_exempt_from_the_period` · `recovery_is_exempt_from_the_period` (the investor moved to the U.S. before the recovery; an ordinary transfer to the new wallet gets 305) | e2e |
 | 6 | Unauthorized configuration rejected | `config_requires_the_owner` (no auth, and auth from another address) · `compliance_address_is_one_time` | unit |
 
 Behaviour that is not in ADR-007's list but is part of the rule as built:
@@ -47,7 +47,7 @@ Behaviour that is not in ADR-007's list but is part of the rule as built:
 | Views report the configuration; notification hooks change nothing | `views_report_the_configuration` · `notification_hooks_do_nothing` |
 | A wallet without an identity cannot receive (identity stack, not the module) | `a_wallet_without_identity_cannot_receive` |
 
-Recovery transfers are exempt for the same reason forced transfers are: OpenZeppelin's token does not call `can_transfer` on them. The spike tests the forced case only; the recovery case is added in T1 (§6).
+Recovery transfers are exempt for the same reason forced transfers are: OpenZeppelin's token does not call `can_transfer` on them. Both cases are tested end to end.
 
 ## 4. How to run it
 
@@ -81,7 +81,6 @@ Releases (`v*` tags) build each contract in GitHub Actions and attest its hash (
 
 | Gap | Why it matters | When |
 |---|---|---|
-| Recovery transfer during the period | Exempt by design; only forced transfers are tested | T1 |
 | Roles as in the overview (`admin`, `agent`, `claim_signer`, `module_operator`) | The spike uses OpenZeppelin's example roles (`admin`, `manager`) | T1 |
 | Claim expiry and revocation reaching the token | A KYC claim that expires or is revoked must stop transfers | T1 |
 | Property-based tests over ledgers, amounts and country sets | Unit tests cover chosen points, not the space between them | T1 |

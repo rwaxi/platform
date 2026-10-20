@@ -214,6 +214,39 @@ fn forced_transfer_is_exempt_from_the_period() {
 }
 
 #[test]
+fn recovery_is_exempt_from_the_period() {
+    let w = World::new();
+    let alice = w.investor(COLOMBIA);
+    let bob = w.investor(COLOMBIA);
+    w.token.mint(&alice, &(100 * UNIT), &w.admin);
+    w.token.mint(&bob, &(10 * UNIT), &w.admin);
+
+    // Alice moves to the United States. This goes before the recovery, because
+    // recover_identity moves the identity, with its country data, to the new wallet.
+    let us_residence = CountryData {
+        country: CountryRelation::Individual(IndividualCountryRelation::Residence(USA)),
+        metadata: None,
+    };
+    w.registry
+        .modify_country_data(&alice, &0, &us_residence.into_val(&w.e), &w.admin);
+
+    let new_wallet = Address::generate(&w.e);
+    assert!(w.module.is_active(&w.token.address));
+    w.registry.recover_identity(&alice, &new_wallet, &w.admin);
+    assert!(w.token.recover_balance(&alice, &new_wallet, &w.admin));
+
+    assert_eq!(w.token.balance(&new_wallet), 100 * UNIT);
+    assert_eq!(w.token.balance(&alice), 0);
+
+    // Contrast: an ordinary transfer to the same wallet is refused by the module.
+    assert_eq!(
+        w.token.try_transfer(&bob, &new_wallet, &UNIT).unwrap_err(),
+        Ok(Error::from_contract_error(TRANSFER_NOT_COMPLIANT))
+    );
+    assert_eq!(w.token.balance(&bob), 10 * UNIT);
+}
+
+#[test]
 fn a_wallet_without_identity_cannot_receive() {
     let w = World::new();
     let alice = w.investor(COLOMBIA);
