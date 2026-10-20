@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Pinned on purpose: the contracts are built and audited against these exact versions.
+    ignore:
+      - dependency-name: "soroban-sdk"
+      - dependency-name: "stellar-tokens"
+      - dependency-name: "stellar-access"
+      - dependency-name: "stellar-macros"
+      - dependency-name: "stellar-contract-utils"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
