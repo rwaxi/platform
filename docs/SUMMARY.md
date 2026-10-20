@@ -32,6 +32,7 @@
 
 * [Test plan](test-plan.md)
 * [Compliance matrix](compliance-matrix.md)
+* [Error codes](errors.md)
 * [On-chain metrics](metrics.md)
 * [Roadmap and verification by tranche](roadmap.md)
 
