@@ -46,6 +46,7 @@ Behaviour that is not in ADR-007's list but is part of the rule as built:
 | An empty list of restricted relations is rejected | `empty_relation_list_is_rejected` |
 | Views report the configuration; notification hooks change nothing | `views_report_the_configuration` · `notification_hooks_do_nothing` |
 | A wallet without an identity cannot receive (identity stack, not the module) | `a_wallet_without_identity_cannot_receive` |
+| An expired KYC claim stops transfers to that wallet (error 304, from the identity verifier) | `expired_kyc_claim_blocks_transfers` |
 
 Recovery transfers are exempt for the same reason forced transfers are: OpenZeppelin's token does not call `can_transfer` on them. The spike tests the forced case only; the recovery case is added in T1 (§6).
 
@@ -83,7 +84,7 @@ Releases (`v*` tags) build each contract in GitHub Actions and attest its hash (
 |---|---|---|
 | Recovery transfer during the period | Exempt by design; only forced transfers are tested | T1 |
 | Roles as in the overview (`admin`, `agent`, `claim_signer`, `module_operator`) | The spike uses OpenZeppelin's example roles (`admin`, `manager`) | T1 |
-| Claim expiry and revocation reaching the token | A KYC claim that expires or is revoked must stop transfers | T1 |
+| Claim revocation reaching the token | A revoked KYC claim must stop transfers. Expiry is covered by `expired_kyc_claim_blocks_transfers` | T1 |
 | Property-based tests over ledgers, amounts and country sets | Unit tests cover chosen points, not the space between them | T1 |
 | Integration on the Stellar quickstart container | Today the end-to-end tests run in the Soroban test environment, not on a local network | T2 |
 | Testnet smoke test in CI after every release | The demo is run by hand | T2 |

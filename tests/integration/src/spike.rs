@@ -33,9 +33,13 @@ const COLOMBIA: u32 = 170;
 const USA: u32 = 840;
 const PERIOD_END: u32 = 5_000;
 const UNIT: i128 = 10_000_000;
+const DAY: u64 = 86_400;
+const KYC_VALIDITY: u64 = 365 * DAY;
 /// `RWAError::TransferNotCompliant` / `MintNotCompliant` in OZ stellar-tokens 0.7.2.
 const TRANSFER_NOT_COMPLIANT: u32 = 305;
 const MINT_NOT_COMPLIANT: u32 = 306;
+/// `RWAError::IdentityVerificationFailed` in OZ stellar-tokens 0.7.2.
+const IDENTITY_VERIFICATION_FAILED: u32 = 304;
 
 struct World<'a> {
     e: Env,
@@ -112,8 +116,14 @@ impl<'a> World<'a> {
     }
 
     /// A verified investor: identity contract with a signed KYC claim, plus a registry
-    /// entry with the country of residence.
+    /// entry with the country of residence. The claim is valid for one year.
     fn investor(&self, country: u32) -> Address {
+        self.investor_with_kyc_valid_for(country, KYC_VALIDITY)
+    }
+
+    /// Same as `investor`, with a KYC claim that expires `valid_for` seconds after the
+    /// current ledger timestamp.
+    fn investor_with_kyc_valid_for(&self, country: u32, valid_for: u64) -> Address {
         let e = &self.e;
         let wallet = Address::generate(e);
         let identity_id = e.register(IdentityContract, (&wallet,));
@@ -121,7 +131,7 @@ impl<'a> World<'a> {
 
         let raw = Bytes::from_array(e, &[1u8, 2, 3]);
         let now = e.ledger().timestamp();
-        let data = encode_claim_data_expiration(e, now, now + 365 * 86_400, &raw);
+        let data = encode_claim_data_expiration(e, now, now + valid_for, &raw);
         let message = e.as_contract(&self.issuer, || {
             Ed25519Verifier::build_message(e, &identity_id, KYC, &data)
         });
@@ -221,4 +231,30 @@ fn a_wallet_without_identity_cannot_receive() {
     w.token.mint(&alice, &(100 * UNIT), &w.admin);
     // Rejected by the identity stack, not by the Reg S module.
     assert!(w.token.try_transfer(&alice, &stranger, &UNIT).is_err());
+}
+
+#[test]
+fn expired_kyc_claim_blocks_transfers() {
+    let w = World::new();
+    let alice = w.investor(COLOMBIA);
+    let bob = w.investor_with_kyc_valid_for(COLOMBIA, 30 * DAY);
+    w.token.mint(&alice, &(100 * UNIT), &w.admin);
+
+    w.token.transfer(&alice, &bob, &UNIT);
+    assert_eq!(w.token.balance(&bob), UNIT);
+
+    // One second past the end of Bob's claim. Alice's claim is still valid.
+    let bob_claim_expires = w.e.ledger().timestamp() + 30 * DAY;
+    w.e.ledger().set_timestamp(bob_claim_expires + 1);
+
+    // The claim issuer refuses the expired claim with NotAllowed (354), but the
+    // identity verifier calls it with `try_is_claim_valid` and only sees "not valid".
+    // With no other valid claim for the KYC topic it fails with
+    // IdentityVerificationFailed (304), and that is the error the transfer returns.
+    assert_eq!(
+        w.token.try_transfer(&alice, &bob, &UNIT).unwrap_err(),
+        Ok(Error::from_contract_error(IDENTITY_VERIFICATION_FAILED))
+    );
+    assert_eq!(w.token.balance(&bob), UNIT);
+    assert_eq!(w.token.balance(&alice), 99 * UNIT);
 }
